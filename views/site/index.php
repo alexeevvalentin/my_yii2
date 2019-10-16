@@ -19,22 +19,25 @@ $this->title = 'My Yii Application';
 
 <?php
 
-
-
+use yii\helpers\Html;
+use \app\models\Books;
 
 //$model = new Books;
 //$books = new Books();
 //echo 'User::$users';
 
 
-$books = new \app\models\Books();
-print_r(\app\models\Books::find()->where(['id' => '2'])->all());
+//$books = new \app\models\Books();
+
+//$books = \app\models\Books::find()->where(['id' => '2'])->one();
+
+//print_r(json_encode(['0'=>'32','1'=>'31']));
 
 
 ?>
 
 
-
+<?= Html::a('test', ['/db' /*, 'id' => 123*/]) ?>
 
 
 

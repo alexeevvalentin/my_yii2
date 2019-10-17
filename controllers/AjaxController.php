@@ -2,7 +2,7 @@
 
 namespace app\controllers;
 
-class DBController extends \yii\web\Controller
+class AjaxController extends \yii\web\Controller
 {
     public function actionIndex()
     {

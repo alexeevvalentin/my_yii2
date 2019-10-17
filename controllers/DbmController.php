@@ -13,7 +13,7 @@ class DbmController extends \yii\web\Controller
     }
     public function actionTest()
     {
-        echo 'TEST';
+        return 'TEST';
     }
 
 }

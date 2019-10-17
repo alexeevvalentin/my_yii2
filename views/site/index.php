@@ -29,6 +29,7 @@ use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use \app\models\Books;
 use \app\models\DBM;
+use \app\models\Ajax;
 
 //$model = new Books;
 //$books = new Books();
@@ -48,31 +49,15 @@ use \app\models\DBM;
 
 //echo Yii::$app->urlManager->createUrl(['../views/db']);
 
-echo Html::a('fgsdfgs', ['dbm/test']);
+echo Html::a('Редактирование данных', ['dbm/test']);
 
 
-//echo DB::test();
+Ajax::field('button', 'get_val', 'id_button', 'dbm/test', '', 'alert(data)');
 
 ?>
 
 
 
-<script>
-
-    $(document).ready(function(){
-        $.ajax({
-            type: 'POST',
-            url: '<?=Url::to(['dbm/test'])?>',
-            //url: '<?//=Yii::$app->urlManager->createUrl(['dbm/test'])?>',
-            data: {_csrf: '<?=Yii::$app->request->getCsrfToken()?>'},
-            success: function(data){
-                console.log(data);
-            }
-        });
-
-    });
-
-</script>
 
 
 

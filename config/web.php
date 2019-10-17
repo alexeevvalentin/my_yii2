@@ -13,7 +13,7 @@ $config = [
     ],
     'components' => [
 
-
+/*
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
@@ -22,7 +22,7 @@ $config = [
                 // ...
             ],
         ],
-
+*/
 
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
@@ -55,14 +55,22 @@ $config = [
             ],
         ],
         'db' => $db,
-        /*
+
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                /*
+                '' => 'site/index',
+                'login' => 'site/login',
+                'signup' => 'site/signup',
+                '<controller:[\w-]+>/<id:\d+>' => '<controller>/view',
+                '<controller:[\w-]+>/<action:[\w-]+>/<id:\d+>' => '<controller>/<action>',
+                '<controller:[\w-]+>/<action:[\w-]+>' => '<controller>/<action>',
+                */
             ],
         ],
-        */
+
     ],
     'params' => $params,
 ];

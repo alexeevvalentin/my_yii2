@@ -6,6 +6,11 @@
 
 //print_r(Books::model()->findByAttributes(array('name'=>'222')));
 
+echo '<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>';
+echo '<script src="http://code.jquery.com/jquery-1.8.3.js"></script>';
+echo '<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>';
+echo '<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">';
+echo '<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">';
 
 
 //print_r($books);
@@ -20,7 +25,10 @@ $this->title = 'My Yii Application';
 <?php
 
 use yii\helpers\Html;
+use yii\helpers\Url;
+use yii\widgets\ActiveForm;
 use \app\models\Books;
+use \app\models\DBM;
 
 //$model = new Books;
 //$books = new Books();
@@ -34,12 +42,37 @@ use \app\models\Books;
 //print_r(json_encode(['0'=>'32','1'=>'31']));
 
 
+
+//Yii::$app->urlManager->createUrl(['/db' , 'action' => 'editor'])
+
+
+//echo Yii::$app->urlManager->createUrl(['../views/db']);
+
+echo Html::a('fgsdfgs', ['dbm/test']);
+
+
+//echo DB::test();
+
 ?>
 
 
-<?= Html::a('test', ['/db' /*, 'id' => 123*/]) ?>
 
+<script>
 
+    $(document).ready(function(){
+        $.ajax({
+            type: 'POST',
+            url: '<?=Url::to(['dbm/test'])?>',
+            //url: '<?//=Yii::$app->urlManager->createUrl(['dbm/test'])?>',
+            data: {_csrf: '<?=Yii::$app->request->getCsrfToken()?>'},
+            success: function(data){
+                console.log(data);
+            }
+        });
+
+    });
+
+</script>
 
 
 

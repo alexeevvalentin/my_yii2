@@ -105,6 +105,12 @@ a.desc:after {
     }
 }
 
+.div_tab{display:table;}
+.div_tab > div{display:table-cell;}
+.div_tab * p{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.div_person{padding:8px; width:750px;}
+.div_person > p{overflow:auto;white-space:normal;}
+
 .nav > li > form > button.logout:focus,
 .nav > li > form > button.logout:hover {
     text-decoration: none;

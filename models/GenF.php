@@ -73,33 +73,6 @@ class GenF extends Model
         return $new;
     }
 
-    // --------- преобразование из Delphi функционала -----------------------
-    public static function la_to_json($str){
-        $str = trim($str);
-        $str = preg_replace('|\s+|', ' ', $str);
-        $str = str_replace('" ]', '"]', $str);
-        $str = str_replace('="', '"="', $str);
-        $str = str_replace('" ', '","', $str);
-        $str = str_replace('=[', '"=["', $str);
-        $str = str_replace('[', '{', $str);
-        $str = str_replace(']', '}', $str);
-        $str = '{"'.$str.'}';
-        return str_replace('=', ':', $str);
-    }
-    // --------- преобразование из Delphi функционала -----------------------
-
-    public static function count_file_dir($path_dir){
-        if(file_exists($path_dir)){
-            $dir = opendir($path_dir);
-            $count = 0;
-            while($file = readdir($dir)){
-                if($file == '.' || $file == '..' || is_dir($path_dir . $file)){continue;}
-                $count++;
-            }
-            return $count;
-        }
-    }
-
     public static function get_file_name_dir($path_dir){
         if(file_exists($path_dir)){
             $dir = opendir($path_dir);

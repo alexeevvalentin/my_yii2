@@ -13,17 +13,6 @@ $config = [
     ],
     'components' => [
 
-/*
-        'urlManager' => [
-            'enablePrettyUrl' => true,
-            'showScriptName' => false,
-            'enableStrictParsing' => false,
-            'rules' => [
-                // ...
-            ],
-        ],
-*/
-
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'fMy4N8g-xGmpJBjmqkh-pzs0cw7vXeLS',
@@ -59,7 +48,21 @@ $config = [
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
+            //'enableStrictParsing' => true,
             'rules' => [
+                '<controller:(news)>/page/<page:\d+>' => '<controller>/index',
+                //'<controller:(news)+>/<action:(rubric)>/type/<type:[\w-]+>/page/<page:\d+>/limit/<limit:\d+>' => '<controller>/<action>',
+                '<controller:(news)+>/<action:(rubric)>/type/<type:[\w-]+>/page/<page:\d+>' => '<controller>/<action>',
+                '<controller:(news)>/<action:(rubric)>/type/<type:[\w-]+>' => '<controller>/<action>',
+
+
+
+
+
+
+                //'<controller:(news)>/<action:(rubric)>/<type:[\w-]+>/page' => '<controller>/<action>/<type>',
+
+                //'news/rubric/type/<type:[\w-]+>' => 'news/rubric/<type>'
                 /*
                 '' => 'site/index',
                 'login' => 'site/login',

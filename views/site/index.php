@@ -3,7 +3,6 @@
 /* @var $this yii\web\View */
 
 //print_r(Yii::$app->db->createCommand('SELECT * FROM books')->queryAll());
-
 //print_r(Books::model()->findByAttributes(array('name'=>'222')));
 
 echo '<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>';
@@ -12,12 +11,9 @@ echo '<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>';
 echo '<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">';
 echo '<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">';
 
+$this->title = 'Yii проекты';
+Yii::$app->name = 'Мои Yii проекты';
 
-//print_r($books);
-
-//findByAttributes(array('name'=>'222')));
-
-$this->title = 'My Yii Application';
 ?>
 
 
@@ -31,28 +27,15 @@ use \app\models\Books;
 use \app\models\DBM;
 use \app\models\Ajax;
 
-//$model = new Books;
-//$books = new Books();
-//echo 'User::$users';
+echo '<div style="font-size:16px;font-weight:bold;padding-bottom:12px;">Проекты:</div>';
 
 
-//$books = new \app\models\Books();
+echo Html::a('Проект "НОВОСТИ"', ['news/index']);
 
-//$books = \app\models\Books::find()->where(['id' => '2'])->one();
-
-//print_r(json_encode(['0'=>'32','1'=>'31']));
-
-
-
-//Yii::$app->urlManager->createUrl(['/db' , 'action' => 'editor'])
-
-
-//echo Yii::$app->urlManager->createUrl(['../views/db']);
-
+/*
 echo Html::a('Редактирование данных', ['dbm/test']);
-
-
 Ajax::field('button', 'get_val', 'id_button', 'dbm/test', '', 'alert(data)');
+*/
 
 ?>
 

@@ -51,26 +51,9 @@ $config = [
             //'enableStrictParsing' => true,
             'rules' => [
                 '<controller:(news)>/page/<page:\d+>' => '<controller>/index',
-                //'<controller:(news)+>/<action:(rubric)>/type/<type:[\w-]+>/page/<page:\d+>/limit/<limit:\d+>' => '<controller>/<action>',
+                '<controller:(news)>/nid/<nid:\d+>' => '<controller>/nid',
                 '<controller:(news)+>/<action:(rubric)>/type/<type:[\w-]+>/page/<page:\d+>' => '<controller>/<action>',
                 '<controller:(news)>/<action:(rubric)>/type/<type:[\w-]+>' => '<controller>/<action>',
-
-
-
-
-
-
-                //'<controller:(news)>/<action:(rubric)>/<type:[\w-]+>/page' => '<controller>/<action>/<type>',
-
-                //'news/rubric/type/<type:[\w-]+>' => 'news/rubric/<type>'
-                /*
-                '' => 'site/index',
-                'login' => 'site/login',
-                'signup' => 'site/signup',
-                '<controller:[\w-]+>/<id:\d+>' => '<controller>/view',
-                '<controller:[\w-]+>/<action:[\w-]+>/<id:\d+>' => '<controller>/<action>',
-                '<controller:[\w-]+>/<action:[\w-]+>' => '<controller>/<action>',
-                */
             ],
         ],
 

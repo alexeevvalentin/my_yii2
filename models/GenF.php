@@ -48,13 +48,27 @@ class GenF extends Model
     }
 
     public static function array_to_object($array) {
-        $obj = new stdClass;
+        $obj = new \stdClass;
         foreach($array as $k => $v) {
             if(strlen($k)) {
                 if(is_array($v)) {
                     $obj->{$k} = self::array_to_object($v); //RECURSION
                 } else {
                     $obj->{$k} = $v;
+                }
+            }
+        }
+        return $obj;
+    }
+
+    public static function array_to_object_keystr($array, $delim='____') {
+        $obj = new \stdClass;
+        foreach($array as $k => $v) {
+            if(strlen($k)) {
+                if(is_array($v)) {
+                    $obj->{$k.$delim} = self::array_to_object_keystr($v, $delim); //RECURSION
+                } else {
+                    $obj->{$k.$delim} = $v;
                 }
             }
         }

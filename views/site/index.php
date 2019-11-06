@@ -29,8 +29,13 @@ use \app\models\Ajax;
 
 echo '<div style="font-size:16px;font-weight:bold;padding-bottom:12px;">Проекты:</div>';
 
-
+echo '<div>';
 echo Html::a('Проект "НОВОСТИ"', ['news/index']);
+echo '</div>';
+
+echo '<div>';
+echo Html::a('Проект "КНИЖНЫЙ МАГАЗИН"', ['shopb/index']);
+echo '</div>';
 
 /*
 echo Html::a('Редактирование данных', ['dbm/test']);
@@ -38,10 +43,6 @@ Ajax::field('button', 'get_val', 'id_button', 'dbm/test', '', 'alert(data)');
 */
 
 ?>
-
-
-
-
 
 
 <!--

@@ -31,24 +31,26 @@ class DbmController extends \yii\web\Controller
 
     public function actionCreate($table)
     {
+        $fl_isset_file = self::file_filter($table);
+        if($fl_isset_file !== ''){
+            $action = 'create';
+            return require_once($fl_isset_file);
+        }else {
+            $model = $this->createModel($table);
 
-        //$model = new DBM();
-        //$model::$smodel_name = $table;
+            $pdata = Yii::$app->request->post();
+            self::data_model_to_json($pdata);
+            //self::data_model_htmlspecialchars($pdata);
 
-        $model = $this->createModel($table);
+            if ($model->load($pdata) && $model->save()) {
+                return $this->redirect(['view', 'id' => $model->id, 'table' => $table]);
+            }
 
-        $pdata = Yii::$app->request->post();
-        self::data_model_to_json($pdata);
-
-        if ($model->load($pdata) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id, 'table' => $table]);
+            return $this->render('create', [
+                'model' => $model,
+                'table' => $table
+            ]);
         }
-
-        return $this->render('create', [
-            'model' => $model,
-            'table' => $table
-        ]);
-
     }
 
     public function actionUpdate($table, $id)
@@ -66,6 +68,7 @@ class DbmController extends \yii\web\Controller
 
             $pdata = Yii::$app->request->post();
             self::data_model_to_json($pdata);
+            //self::data_model_htmlspecialchars($pdata);
 
             if ($model->load($pdata) && $model->save()) {
                 return $this->redirect(['update', 'id' => $model->id, 'table' => $table]);
@@ -79,8 +82,16 @@ class DbmController extends \yii\web\Controller
 
     public function actionDelete($table, $id)
     {
-        $this->findModel($table, $id)->delete();
-        return $this->redirect(['index', 'table' => $table]);
+
+        $fl_isset_file = self::file_filter($table);
+        if($fl_isset_file !== ''){
+            $action = 'delete';
+            return require_once($fl_isset_file);
+        }else{
+            $this->findModel($table, $id)->delete();
+            return $this->redirect(['index', 'table' => $table]);
+        }
+
     }
 
     protected function findModel($table, $id)
@@ -107,6 +118,16 @@ class DbmController extends \yii\web\Controller
             foreach($post_data['DBM'] as $k => $v) {
                 if(is_array($v)){
                     $post_data['DBM'][$k] = Json::encode($v);
+                }
+            }
+        }
+    }
+
+    private static function data_model_htmlspecialchars(&$post_data){
+        if(isset($post_data['DBM'])) {
+            foreach($post_data['DBM'] as $k => $v) {
+                if(is_string($v)){
+                    $post_data['DBM'][$k] = htmlspecialchars($v);
                 }
             }
         }

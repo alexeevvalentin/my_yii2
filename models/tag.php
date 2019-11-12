@@ -19,6 +19,28 @@ use yii\helpers\Json;
 class tag extends Model
 {
 
+    private static function arr_sc(){
+        $specialChars = [
+        '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+',
+        ',', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\',
+        ']', '^', '_', '`', '{', '|', '}', '§', '©', '¶'
+        ];
+        return $specialChars;
+    }
+
+    private static function to_htmlspecialchars($str){
+        if(preg_match('/[\'\/~`\!@#\$%\^&\*\(\)_\-\+=\{\}\[\]\|;:"\<\>,\.\?\\\]/', $str)){
+            if(GenF::index_of($str,'&') !== -1){
+                return $str;
+            }else{
+                $str = htmlspecialchars($str);
+                return self::to_htmlspecialchars($str);
+            }
+        }else{
+            return $str;
+        }
+    }
+
     public static function tag_symb($str, $replace='_'){
         $str_new = preg_replace("/&#?[a-z0-9]+;/i", $replace, $str);
         $str_new = preg_replace("/(?![.=$'€%-])\p{P}/u", $replace, $str_new);
@@ -48,6 +70,11 @@ class tag extends Model
                 $set_value = $model->$name;
             }
         }else if(is_array($set_value)){
+            foreach($set_value as $k=>$v){
+                if(is_string($v)){
+                    $set_value[$k] = htmlspecialchars($v);
+                }
+            }
             $set_value = Json::encode($set_value);
         }
 
@@ -55,22 +82,24 @@ class tag extends Model
             $set_value = Json::encode([]);
         }
 
-        $tag_source = '<div id="'.$this_id.'" name="'.$class_name.'['.$name.']" '.$options.' value=\''.$set_value.'\'><input type="hidden" id="'.$this_id.'_hide" name="'.$class_name.'['.$name.'_hide]" /></div>';
+        $tag_source = '<div id="'.$this_id.'" name="'.$class_name.'['.$name.']" '.$options.' value=\''.htmlspecialchars($set_value).'\'><input type="hidden" id="'.$this_id.'_hide" name="'.$class_name.'['.$name.'_hide]" /></div>';
         echo $tag_source;
 
         $jsTag =<<<JS
-            
+
             var this_id_key = "$this_id";
             var this_id_hide = this_id_key+"_hide";
             var class_del_button = "del_"+this_id_key;
-            
+
             var sel_commun = $("#$id_commun");
             var sel_this = $("#$this_id");
             
             $("#"+this_id_hide).val(sel_this.attr("value"));
-            
-            var arr_value = JSON.parse('$set_value');
 
+            var jsonString = '$set_value';
+            
+            var arr_value = JSON.parse(jsonString);
+            
             var source_this = "";
             
             for(var key in arr_value){
@@ -79,6 +108,10 @@ class tag extends Model
             sel_this.append(source_this);
 
             $(document).on("click", "."+class_del_button, function(){
+                class_del_button = "del_"+"$this_id";
+                sel_this = $("#$this_id");
+                this_id_hide = "$this_id"+"_hide";
+                
                 var code_val = $(this).attr("code");
                 $("#"+class_del_button+"_"+code_val).remove();
                 var runtime_val = JSON.parse(sel_this.attr("value"));
@@ -91,7 +124,10 @@ class tag extends Model
             sel_commun.change(function(){
                 var data_commun = JSON.parse($(this).attr("data"));
                 var this_code = $(this).attr("code");
-
+                class_del_button = "del_"+"$this_id";
+                sel_this = $("#$this_id");
+                this_id_hide = "$this_id"+"_hide";
+                
                 if($("#"+class_del_button+"_"+this_code).length === 0 && this_code !== '' && this_code !== undefined){
                     sel_this.append("<div style='display:table;' class='"+class_del_button+"_str' id='"+class_del_button+"_"+this_code+"' ><div style='display:table-cell;padding:3px;'>"+data_commun[this_code]+"</div><div class='"+class_del_button+"' code='"+this_code+"' style='display:table-cell;padding:3px;cursor:pointer;'>&#9746;</div></div>");
                     var runtime_val = JSON.parse(sel_this.attr("value"));
@@ -108,38 +144,43 @@ JS;
         Yii::$app->view->registerJs($jsTag);
     }
 
+    public static function input($model, $name, $options='', $set_value=null){
+        $this_id = self::tag_symb($name);
+        $class_name = end(explode("\\", get_class($model)));
+
+        if(is_array($options)){
+            $str_options = '';
+            foreach($options as $k=>$v){
+                $str_options = $str_options.$k.'="'.$v.'" ';
+            }
+            $options = $str_options;
+        }
+        if($set_value === null){
+            if(isset($model->$name)){
+                $set_value = $model->$name;
+            }
+        }
+
+        $tag_source = '<input type="text" id="'.$this_id.'" name="'.$class_name.'['.$name.']" '.$options.' value="'.$set_value.'" />';
+
+        echo $tag_source;
+
+    }
+
     public static function ecocombo($model, $name, $data='', $options='', $set_value=null){
 
         if(is_array($data) || is_object($data)){
+            foreach($data as $k=>$v){
+                if(is_string($v)){
+                    $data[$k] = htmlspecialchars($v);
+                }
+            }
             $data = Json::encode($data);
         }
 
         if($data == ''){
             $data = Json::encode([]);
         }
-
-        /*
-        if(is_string($data)){
-            $cur_data = Json::decode($data);
-            if(is_array($cur_data)){
-                $delim = '____';
-                $cur_data = GenF::array_to_object_keystr($cur_data, $delim);
-                $data = Json::encode($cur_data);
-                $data = str_replace ( $delim , '' , $data);
-            }
-        }else if(is_array($data)){
-            $delim = '____';
-            $data = GenF::array_to_object_keystr($data, $delim);
-            $data = Json::encode($data);
-            $data = str_replace ( $delim , '' , $data);
-        }else if(is_object($data)){
-            $data = GenF::object_to_array($data);
-            $delim = '____';
-            $data = GenF::array_to_object_keystr($data, $delim);
-            $data = Json::encode($data);
-            $data = str_replace ( $delim , '' , $data);
-        }
-        */
 
         $this_id = self::tag_symb($name);
         $class_name = end(explode("\\", get_class($model)));
@@ -157,7 +198,7 @@ JS;
             }
         }
 
-        $tag_source = '<input type="text" id="'.$this_id.'" name="'.$class_name.'['.$name.']" '.$options.' data=\''.$data.'\' value="'.$set_value.'" />';
+        $tag_source = '<input type="text" id="'.$this_id.'" name="'.$class_name.'['.$name.']" '.$options.' data=\''.htmlspecialchars($data).'\' value="'.$set_value.'" />';
 
         echo $tag_source;
 
@@ -167,7 +208,7 @@ JS;
         ecocombo(selector_this_id);
         function ecocombo(selector, in_col = 8){
             var this_id = selector.attr("id")+"_btn";
-            selector.parent().append('<div id="'+this_id+'" style="position:absolute;left:' + (1*selector.position().left + 1*selector.width() - 18 + 3) + 'px;top:' + selector.position().top + 'px;width:18px;height:16px;font-size:9px;cursor:pointer;text-align:center;padding-top:5px;">&#9660;</div>');
+            selector.parent().append('<div id="'+this_id+'" class="ecocombo_btn" style="position:relative;left:'+(selector.width()-16)+'px;top:-24px;width:18px;height:16px;font-size:9px;cursor:pointer;text-align:center;padding-top:5px;">&#9660;</div>');
             var this_selector = $('#'+this_id);
 
             function arr_sorti_local(arr, sort_stb = 0){
@@ -296,9 +337,7 @@ JS;
         			setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_btn !== 1){list_selector.remove();}}, 0);
         		}
         	);
-        	
-        	
-        	
+
         	for(var i in source){
         		list_selector.append('<div class="'+list_id+'_option_row" code="'+source[Object.keys(source)[i]][1]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+source[Object.keys(source)[i]][1]+'</div><div style="display:table-cell;padding:3px;">'+source[Object.keys(source)[i]][2]+'</div></div>');
         	}
@@ -380,7 +419,7 @@ JS;
         	});
         	for(var i = attr_start; i < 1*attr_end; i++){
         		if(Object.keys(source)[i] !== undefined){
-        			list_selector.append('<div class="'+list_id+'_option_row" code="'+source[Object.keys(source)[i]][1]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+source[Object.keys(source)[i]][1]+'</div><div style="display:table-cell;padding:3px;">'+source[Object.keys(source)[i]][2]+'</div></div>');
+        			list_selector.append('<div class="'+list_id+'_option_row" code="'+source[Object.keys(source)[i]][1]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:21px;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+source[Object.keys(source)[i]][1]+'</div><div style="display:table-cell;padding:3px;">'+source[Object.keys(source)[i]][2]+'</div></div>');
         		}else{
         			$(this).attr('diap_e', 1*i);
         			break;

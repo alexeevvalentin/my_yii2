@@ -37,6 +37,10 @@ echo '<div>';
 echo Html::a('Проект "КНИЖНЫЙ МАГАЗИН"', ['shopb/index']);
 echo '</div>';
 
+echo '<div>';
+echo Html::a('Таглист', ['taglist/index']);
+echo '</div>';
+
 /*
 echo Html::a('Редактирование данных', ['dbm/test']);
 Ajax::field('button', 'get_val', 'id_button', 'dbm/test', '', 'alert(data)');

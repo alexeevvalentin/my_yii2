@@ -410,6 +410,8 @@ JS;
                 }
             }
 
+            var current_list;
+            
             selector.keyup(function(){
                 $(this).attr('code', '');
                 $(this).attr('value', '');
@@ -433,8 +435,9 @@ JS;
                 var list_id = selector.attr('id')+'_list';
                 var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 5)+'px;max-height:192px;"></div>';
                 selector.parent().append(list_html);
-                var list_selector = $('#'+list_id);
-                list_selector.mouseleave(function(){ $(this).remove(); });
+                
+                var list_selector_filter = $('#'+list_id);
+                list_selector_filter.mouseleave(function(){ $(this).remove(); });
                 var fl_hover_list = 0;var fl_hover_btn = 0;var fl_hover_genselector = 0;
                 this_selector.unbind('mouseenter').unbind('mouseleave');
                 this_selector.hover(
@@ -442,10 +445,10 @@ JS;
                         fl_hover_btn = 1;
                     }, function() {
                         fl_hover_btn = 0;
-                        setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_genselector !== 1){list_selector.remove();}}, 0);
+                        setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_genselector !== 1){list_selector_filter.remove();}}, 0);
                     }
                 );
-                list_selector.hover(
+                list_selector_filter.hover(
                     function(){
                         fl_hover_list = 1;
                     },
@@ -459,16 +462,87 @@ JS;
                     },
                     function(){
                         fl_hover_genselector = 0;
-                        setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_btn !== 1){list_selector.remove();}}, 0);
+                        setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_btn !== 1){list_selector_filter.remove();}}, 0);
                     }
                 );
     
                 for(var i in source){
-                    list_selector.append('<div class="'+list_id+'_option_row" code="'+source[O_K_source[i]][1]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+source[O_K_source[i]][1]+'</div><div style="display:table-cell;padding:3px;">'+source[O_K_source[i]][2]+'</div></div>');
+                    list_selector_filter.append('<div class="'+list_id+'_option_row" code="'+source[O_K_source[i]][1]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+source[O_K_source[i]][1]+'</div><div style="display:table-cell;padding:3px;">'+source[O_K_source[i]][2]+'</div></div>');
                 }
                 
+                current_list = $('#'+list_id)[0].outerHTML;
+
             });
     
+            
+            //if($('#'+selector.attr('id')+'_list').length > 0){ $('#'+selector.attr('id')+'_list').remove(); }
+            /*
+            selector.keydown(function(e){
+                console.log(e.keyCode);
+            });
+            $(document).on("keydown", this_selector.attr('id'), function(e){
+                console.log(e.keyCode);
+            });
+            $(document).on("keydown", selector.attr('id')+'_list', function(e){
+                console.log(e.keyCode);
+            });
+            */
+            
+            $(document).keydown(function(e){
+                if($('#'+selector.attr('id')+'_list').length > 0){
+                    if(e.keyCode === 40){
+                        var onmo;
+                        var index_select = -1;
+                        var selector_row = $('.'+selector.attr('id')+'_list_option_row');
+                        selector_row.each(function(i, el){
+                            onmo = $(el).attr('onmouseover');
+                            if(onmo.search(new RegExp(rgb_to_hex($(el).css('backgroundColor')), "i")) !==-1 ){
+                                index_select = 1*i+1;
+                                if(selector_row.eq(index_select).length > 0){
+                                    selector_row.eq(i).css('backgroundColor', '#FFFFFF');
+                                }
+                            }
+                        });
+                        if(index_select === -1){index_select = 0;}
+                        selector_row.eq(index_select).mouseover();
+                    }else if(e.keyCode === 38){
+                        var onmo;
+                        var index_select = -1;
+                        var selector_row = $('.'+selector.attr('id')+'_list_option_row');
+                        selector_row.each(function(i, el){
+                            onmo = $(el).attr('onmouseover');
+                            if(onmo.search(new RegExp(rgb_to_hex($(el).css('backgroundColor')), "i")) !==-1 ){
+                                index_select = 1*i-1;
+                                if(selector_row.eq(index_select).length > 0){
+                                    selector_row.eq(i).css('backgroundColor', '#FFFFFF');
+                                }
+                            }
+                        });
+                        if(index_select === -1){index_select = 0;}
+                        selector_row.eq(index_select).mouseover();
+                    }else if(e.keyCode === 13){
+                        var onmo;
+                        var selector_row = $('.'+selector.attr('id')+'_list_option_row');
+                        selector_row.each(function(i, el){
+                            onmo = $(el).attr('onmouseover');
+                            if(onmo.search(new RegExp(rgb_to_hex($(el).css('backgroundColor')), "i")) !==-1 ){
+                                selector_row.eq(i).click();
+                            }
+                        });
+                        
+                    }
+                    
+                    
+                    
+                    
+                }
+            });
+            
+            function rgb_to_hex(color){
+                var rgb = color.replace(/\s/g,'').match(/^rgba?\((\d+),(\d+),(\d+)/i);
+                return (rgb && rgb.length === 4) ? "#" + ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) + ("0" + parseInt(rgb[2],10).toString(16)).slice(-2) + ("0" + parseInt(rgb[3],10).toString(16)).slice(-2) : color;
+            }
+            
             $(document).on("click", "."+selector.attr("id")+"_list_option_row", function(){
     
                 selector.attr('code', $(this).attr('code'));
@@ -487,86 +561,128 @@ JS;
                 
             });
             
+            var current_value;
+            
             this_selector.click(function(){
                 
-                if( $('#'+selector.attr('id')+'_list').length > 0){ $('#'+selector.attr('id')+'_list').remove();}
-                var attr_start = 0;
-                var attr_s = $(this).attr('diap_s');
-                var attr_end = 1*in_col;
-                var attr_e = $(this).attr('diap_e');
-                $(this).attr('diap_s', 0);
-                $(this).attr('diap_e', in_col);
-                if(selector.attr('data') === '' || selector.attr('data') === undefined){return false;}
-    
-                //var source = JSON.parse(selector.attr('data'));
-                //source = arr_sorti_local(source);
-    
-                var list_id = selector.attr('id')+'_list';
-                var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 5)+'px;"></div>';
-                selector.parent().append(list_html);
-                var list_selector = $('#'+list_id);
-                list_selector.mouseleave(function(){ $(this).remove();});
-                var fl_hover_list = 0;
-                var fl_hover_btn = 0;
-                var fl_hover_genselector = 0;
-    
-                $(this).unbind('mouseenter').unbind('mouseleave');
-                $(this).hover(
-                    function() {
-                        fl_hover_btn = 1;
-                    }, function() {
-                        fl_hover_btn = 0;
-                        setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_genselector !== 1){list_selector.remove();}}, 0);
-                    }
-                );
-                list_selector.hover(
-                    function(){
-                        fl_hover_list = 1;
-                    },
-                    function(){
-                        fl_hover_list = 0;
-                    }
-                );
-                selector.hover(
-                    function(){
-                        fl_hover_genselector = 1;
-                    },
-                    function(){
-                        fl_hover_genselector = 0;
-                        setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_btn !== 1){list_selector.remove();}}, 0);
-                    }
-                );
-    
-                var CurrentScroll = 0;
-                list_selector.on('DOMMouseScroll mousewheel', function(e){
-                    e.preventDefault();
-                    if(e.originalEvent.wheelDelta < 0 || e.originalEvent.detail > 0) {
-                        //scroll down
-                        combo_step_scroll($(this), this_selector, source, 1);
-                    } else {
-                        //scroll up
-                        combo_step_scroll($(this), this_selector, source, 2);
-                    }
-                });
+                current_value = selector.val();
+                var dtext = selector.attr('data');
+                var dpos = dtext.indexOf(current_value);
                 
-                for(var i = attr_start; i < 1*attr_end; i++){
-    
-                    if(O_K_source[i] !== undefined){
-                        list_selector.append('<div class="'+list_id+'_option_row" code="'+source[O_K_source[i]][1]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:21px;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+source[O_K_source[i]][1]+'</div><div style="display:table-cell;padding:3px;">'+source[O_K_source[i]][2]+'</div></div>');
-                    }else{
-                        $(this).attr('diap_e', 1*i);
-                        break;
-                    }
+                if(dpos !== -1 && current_value.trim() !== ''){
+                    selector.parent().append(current_list);
+                    var list_id = selector.attr('id')+'_list';
+                    var list_selector = $('#'+list_id);
+                    list_selector.mouseleave(function(){ $(this).remove();});
                     
-                    /*
-                    if(Object.keys(source)[i] !== undefined){
-                        list_selector.append('<div class="'+list_id+'_option_row" code="'+source[Object.keys(source)[i]][1]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:21px;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+source[Object.keys(source)[i]][1]+'</div><div style="display:table-cell;padding:3px;">'+source[Object.keys(source)[i]][2]+'</div></div>');
-                    }else{
-                        $(this).attr('diap_e', 1*i);
-                        break;
-                    }*/
+                    var fl_hover_list = 0;
+                    var fl_hover_btn = 0;
+                    var fl_hover_genselector = 0;
+        
+                    $(this).unbind('mouseenter').unbind('mouseleave');
+                    $(this).hover(
+                        function() {
+                            fl_hover_btn = 1;
+                        }, function() {
+                            fl_hover_btn = 0;
+                            setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_genselector !== 1){list_selector.remove();}}, 0);
+                        }
+                    );
+                    list_selector.hover(
+                        function(){
+                            fl_hover_list = 1;
+                        },
+                        function(){
+                            fl_hover_list = 0;
+                        }
+                    );
+                    selector.hover(
+                        function(){
+                            fl_hover_genselector = 1;
+                        },
+                        function(){
+                            fl_hover_genselector = 0;
+                            setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_btn !== 1){list_selector.remove();}}, 0);
+                        }
+                    );
+
+                }else{
+                
+                    if( $('#'+selector.attr('id')+'_list').length > 0){ $('#'+selector.attr('id')+'_list').remove();}
+                    var attr_start = 0;
+                    var attr_s = $(this).attr('diap_s');
+                    var attr_end = 1*in_col;
+                    var attr_e = $(this).attr('diap_e');
+                    $(this).attr('diap_s', 0);
+                    $(this).attr('diap_e', in_col);
+                    if(selector.attr('data') === '' || selector.attr('data') === undefined){return false;}
+                    
+                    var list_id = selector.attr('id')+'_list';
+                    var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 5)+'px;"></div>';
+                    selector.parent().append(list_html);
+                    var list_selector = $('#'+list_id);
+                    list_selector.mouseleave(function(){ $(this).remove();});
+                    var fl_hover_list = 0;
+                    var fl_hover_btn = 0;
+                    var fl_hover_genselector = 0;
+        
+                    $(this).unbind('mouseenter').unbind('mouseleave');
+                    $(this).hover(
+                        function() {
+                            fl_hover_btn = 1;
+                        }, function() {
+                            fl_hover_btn = 0;
+                            setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_genselector !== 1){list_selector.remove();}}, 0);
+                        }
+                    );
+                    list_selector.hover(
+                        function(){
+                            fl_hover_list = 1;
+                        },
+                        function(){
+                            fl_hover_list = 0;
+                        }
+                    );
+                    selector.hover(
+                        function(){
+                            fl_hover_genselector = 1;
+                        },
+                        function(){
+                            fl_hover_genselector = 0;
+                            setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_btn !== 1){list_selector.remove();}}, 0);
+                        }
+                    );
+        
+                    var CurrentScroll = 0;
+                    list_selector.on('DOMMouseScroll mousewheel', function(e){
+                        e.preventDefault();
+                        if(e.originalEvent.wheelDelta < 0 || e.originalEvent.detail > 0) {
+                            //scroll down
+                            combo_step_scroll($(this), this_selector, source, 1);
+                        } else {
+                            //scroll up
+                            combo_step_scroll($(this), this_selector, source, 2);
+                        }
+                    });
+                    
+                    for(var i = attr_start; i < 1*attr_end; i++){
+        
+                        if(O_K_source[i] !== undefined){
+                            list_selector.append('<div class="'+list_id+'_option_row" code="'+source[O_K_source[i]][1]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:21px;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+source[O_K_source[i]][1]+'</div><div style="display:table-cell;padding:3px;">'+source[O_K_source[i]][2]+'</div></div>');
+                        }else{
+                            $(this).attr('diap_e', 1*i);
+                            break;
+                        }
+                        
+                        /*
+                        if(Object.keys(source)[i] !== undefined){
+                            list_selector.append('<div class="'+list_id+'_option_row" code="'+source[Object.keys(source)[i]][1]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:21px;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+source[Object.keys(source)[i]][1]+'</div><div style="display:table-cell;padding:3px;">'+source[Object.keys(source)[i]][2]+'</div></div>');
+                        }else{
+                            $(this).attr('diap_e', 1*i);
+                            break;
+                        }*/
+                    }
                 }
-    
             });
         }
 JS;

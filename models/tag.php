@@ -51,11 +51,17 @@ class tag extends Model
     }
 
     public static function select_monitor($model, $id_commun, $name, $options='', $set_value=null){
+
         $this_id = self::tag_symb($name);
-        $class_name = end(explode("\\", get_class($model)));
+
+        if(is_string($model)){
+            $class_name = $model;
+        }else{
+            $class_name = end(explode("\\", get_class($model)));
+        }
 
         if($options === ''){
-            $options = 'style="width:100%;height:150px;overflow:auto;background-color:#E4E4E4;border: 3px solid #A5A5A5;border-radius:8px;"';
+            $options = 'style="width:100%;min-height:150px;overflow:auto;background-color:#E4E4E4;border: 3px solid #A5A5A5;border-radius:8px;"';
         }
 
         if(is_array($options)){
@@ -65,9 +71,14 @@ class tag extends Model
             }
             $options = $str_options;
         }
+
         if($set_value === null){
             if(isset($model->$name)){
-                $set_value = $model->$name;
+                if(is_string($model->$name)){
+                    $set_value = $model->$name;
+                }else if(is_array($model->$name) || is_object($model->$name)){
+                    $set_value = Json::encode($model->$name);
+                }
             }
         }else if(is_array($set_value)){
             foreach($set_value as $k=>$v){
@@ -167,7 +178,7 @@ JS;
 
     }
 
-    public static function ecocombo($model, $name, $data='', $options='', $set_value=null, $search_case="i"){
+    public static function ecocombo($model, $name, $data='', $options='', $set_value=null, $search_case="i", $max_count=100, $max_show=8){
 
         if(is_array($data) || is_object($data)){
             foreach($data as $k=>$v){
@@ -209,9 +220,9 @@ JS;
         $jsTag =<<<JS
 
         var selector_this_id = $("#$this_id");
-        ecocombo(selector_this_id, "$search_case");
+        ecocombo(selector_this_id, "$search_case", $max_count, $max_show);
         
-        function ecocombo(selector, s_case, in_col = 8){
+        function ecocombo(selector, s_case, max_count=100, max_show=8){
             
             var source;
             var O_K_source;
@@ -312,8 +323,8 @@ JS;
                 else if(cur_value === ':'){if(1*data_text.search(new RegExp(cur_value, "i")) === (1 + 1*data_text.search(new RegExp('"'+cur_value+'"', "i")))){return false;}}
 
                 if(data_text.search(new RegExp(cur_value, "i")) !== -1){
-                    // больше 1000 в селекте нет смысла отображать для поиска
-                    if(step < 1000){
+                    // больше max_count в селекте нет смысла отображать для поиска
+                    if(step < max_count){
                         var prom_data_begin = data_text.substr(0, data_text.search(new RegExp(cur_value, "i")));
                         if(prom_data_begin.lastIndexOf('","') !== -1){var index_begin = prom_data_begin.lastIndexOf('","') + ('","').length;}
                         else{if(prom_data_begin.indexOf('{') === 0){var index_begin = 0;if(final_text === undefined){final_text = '';}}}
@@ -367,8 +378,8 @@ JS;
                 else if(cur_value === ':'){if(1*data_text.indexOf(cur_value) === (1 + 1*data_text.indexOf('"'+cur_value+'"'))){return false;}}
 
                 if(data_text.indexOf(cur_value) !== -1){
-                    // больше 1000 в селекте нет смысла отображать для поиска
-                    if(step < 1000){
+                    // больше max_count в селекте нет смысла отображать для поиска
+                    if(step < max_count){
                         var prom_data_begin = data_text.substr(0, data_text.indexOf(cur_value));
                         if(prom_data_begin.lastIndexOf('","') !== -1){var index_begin = prom_data_begin.lastIndexOf('","') + ('","').length;}
                         else{if(prom_data_begin.indexOf('{') === 0){var index_begin = 0;if(final_text === undefined){final_text = '';}}}
@@ -433,7 +444,7 @@ JS;
                 source = arr_sorti_local(source);
                 
                 var list_id = selector.attr('id')+'_list';
-                var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 5)+'px;max-height:192px;"></div>';
+                var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;z-index:1000;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 5)+'px;max-height:192px;"></div>';
                 selector.parent().append(list_html);
                 
                 var list_selector_filter = $('#'+list_id);
@@ -473,20 +484,6 @@ JS;
                 current_list = $('#'+list_id)[0].outerHTML;
 
             });
-    
-            
-            //if($('#'+selector.attr('id')+'_list').length > 0){ $('#'+selector.attr('id')+'_list').remove(); }
-            /*
-            selector.keydown(function(e){
-                console.log(e.keyCode);
-            });
-            $(document).on("keydown", this_selector.attr('id'), function(e){
-                console.log(e.keyCode);
-            });
-            $(document).on("keydown", selector.attr('id')+'_list', function(e){
-                console.log(e.keyCode);
-            });
-            */
             
             $(document).keydown(function(e){
                 if($('#'+selector.attr('id')+'_list').length > 0){
@@ -529,12 +526,7 @@ JS;
                                 selector_row.eq(i).click();
                             }
                         });
-                        
                     }
-                    
-                    
-                    
-                    
                 }
             });
             
@@ -558,6 +550,8 @@ JS;
                 if($('#'+selector.attr('id')+'_list').length > 0){
                     $('#'+selector.attr('id')+'_list').remove();
                 }
+                
+                current_list = '';
                 
             });
             
@@ -611,14 +605,14 @@ JS;
                     if( $('#'+selector.attr('id')+'_list').length > 0){ $('#'+selector.attr('id')+'_list').remove();}
                     var attr_start = 0;
                     var attr_s = $(this).attr('diap_s');
-                    var attr_end = 1*in_col;
+                    var attr_end = 1*max_show;
                     var attr_e = $(this).attr('diap_e');
                     $(this).attr('diap_s', 0);
-                    $(this).attr('diap_e', in_col);
+                    $(this).attr('diap_e', max_show);
                     if(selector.attr('data') === '' || selector.attr('data') === undefined){return false;}
                     
                     var list_id = selector.attr('id')+'_list';
-                    var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 5)+'px;"></div>';
+                    var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;z-index:1000;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 5)+'px;"></div>';
                     selector.parent().append(list_html);
                     var list_selector = $('#'+list_id);
                     list_selector.mouseleave(function(){ $(this).remove();});
@@ -691,5 +685,183 @@ JS;
 
     }
 
-}
+    public static function monetary_field($model, $name, $this_total=4, $this_fraction=2, $options='', $set_value=null)
+    {
+
+        $plshold = '';
+        $ost = '';
+        $this_id = self::tag_symb($name);
+        for ($i = 0; $i < $this_total; $i++) {
+            if (1 * $i === 1 * $this_fraction) {
+                $plshold = '.' . $plshold;
+                $ost = $plshold;
+                $plshold = '0' . $plshold;
+            } else {
+                $plshold = '0' . $plshold;
+            }
+        }
+
+        if(is_string($model)){
+            $class_name = $model;
+        }else{
+            $class_name = end(explode("\\", get_class($model)));
+        }
+
+        if(is_array($options)){
+            $str_options = '';
+            foreach($options as $k=>$v){
+                $str_options = $str_options.$k.'="'.$v.'" ';
+            }
+            $options = $str_options;
+        }
+        if($set_value === null){
+            if(isset($model->$name)){
+                $set_value = $model->$name;
+            }
+        }
+
+        if(GenF::index_of($options, 'style')===-1){
+            $options = $options.' style="width:250px;text-align:right;"';
+        }
+
+        $tag_source = '<input type="text" id="'.$this_id.'" name="'.$class_name.'['.$name.']" '.$options.' value="'.$set_value.'" placeholder="'.$plshold.'" />';
+
+        echo $tag_source;
+
+        //echo '<script> monetary_field("' . $this_id . '", ' . $this_total . ', ' . $this_fraction . ', "' . $ost . '"); </script>';
+
+        $jsTag =<<<JS
+        
+            monetary_field("$this_id", $this_total, $this_fraction, "$ost");
+        
+            new function($) {
+              $.fn.setCursorPosition = function(pos){
+                if (this[0].setSelectionRange) {
+                  this[0].setSelectionRange(pos, pos);
+                } else if (this.createTextRange) {
+                  var range = this.createTextRange();
+                  range.collapse(true);
+                  if(pos < 0) {
+                    pos = $(this).val().length + pos;
+                  }
+                  range.moveEnd("character", pos);
+                  range.moveStart("character", pos);
+                  range.select();
+                }
+              }
+            }(jQuery);
+            
+            function is_int_chr(chr){
+                if(chr === 48 || chr === 49 || chr === 50 || chr === 51 || chr === 52 || chr === 53 || chr === 54 || chr === 55 || chr === 56 || chr === 57){return true;}else{return false;}
+            }
+            
+            function is_double_chr(chr){
+                if(chr === 46 || chr === 48 || chr === 49 || chr === 50 || chr === 51 || chr === 52 || chr === 53 || chr === 54 || chr === 55 || chr === 56 || chr === 57){return true;}else{return false;}
+            }
+            
+            function monetary_field(this_id, this_total, this_fraction, ost){
+
+            var total = 1 * this_total;
+            var fraction = 1 * this_fraction;
+
+            var selector_this_id = $('#'+this_id);
+            selector_this_id.keydown(function(e){
+                if(e.keyCode == 8 || e.keyCode == 46){
+                    var cur_val = $(this).val();
+                    var cur_pos = this.selectionStart;
+                    var first_path = cur_val.substr(0, cur_pos);
+                    var second_path = cur_val.substr(cur_pos);
+                    var ceil_path = cur_val.substr(0, cur_val.indexOf("."));
+                    var first_path_l_s = first_path.substr(first_path.length-1);
+                    if(first_path_l_s == "." && this.selectionStart === this.selectionEnd){return false;}
+                    if(cur_pos > fraction){
+                        if(this.selectionStart === this.selectionEnd){
+                            first_path = first_path.substr(0, first_path.length-1);
+                            if(first_path + "0" + second_path === "0"){return false;}
+                            $(this).val(first_path + "0" + second_path);
+                            $(this).setCursorPosition(cur_pos-1);
+                            return false;
+                        }
+                    }else{
+                        if((this.selectionEnd - this.selectionStart) === cur_val.length){
+                            $(this).val(""); 
+                            return false;
+                        }
+                        if(this.selectionStart == this.selectionEnd){
+                            $(this).val((1*(first_path.substr(0, first_path.length-1) + second_path)).toFixed(fraction)); $(this).setCursorPosition(cur_pos-1); return false;
+                        }else{
+                            second_path = second_path.substr(this.selectionEnd - this.selectionStart);
+                            if(second_path.indexOf(".") === -1){second_path = "."+second_path;}
+                            $(this).val((1*(first_path + second_path)).toFixed(fraction)); $(this).setCursorPosition(cur_pos); return false;
+                        }
+                    }
+                    $(this).val((1* (first_path) ).toFixed(fraction)); $(this).setCursorPosition(cur_pos); return false;
+                };
+            });
+
+            selector_this_id.keypress(function(e){
+                if(is_double_chr(e.charCode)){
+                    if($(this).val()=="" && is_int_chr(e.charCode)){
+                        $(this).val(String.fromCharCode(e.charCode) + ost); 
+                        $(this).setCursorPosition(1); 
+                        return false;
+                    }
+                    var cur_str_val = $(this).val();
+                    
+                    if(e.charCode === 46 && cur_str_val.indexOf(".") !== -1){
+                        var substr_cur_str_val = cur_str_val.substr(0, cur_str_val.indexOf("."));
+                        var count_cur_str_val = substr_cur_str_val.length + 1;
+                        $(this).setCursorPosition(count_cur_str_val); 
+                        return false;
+                    }
+
+                    if(cur_str_val.length > total){
+                        var cur_pos = this.selectionStart;
+                        var cur_val = $(this).val();
+                        var first_path = cur_val.substr(0, cur_pos);
+                        var second_path = cur_val.substr(cur_pos);
+                        
+                        var fraction_position = cur_val.indexOf('.');
+
+                        if(cur_pos > fraction_position){
+                            if(second_path == ""){return false;}
+                            second_path = second_path.substr(this.selectionEnd - this.selectionStart);
+                            var ifcurval = first_path + String.fromCharCode(e.charCode) + second_path;
+                            $(this).val((1*ifcurval).toFixed(fraction));
+                            $(this).setCursorPosition(cur_pos+1);
+                        }else{
+                            if(cur_pos === fraction_position){
+                                $(this).setCursorPosition(cur_pos+1); 
+                                return false;
+                            }
+                            step_path = this.selectionEnd - this.selectionStart;
+                            if(step_path == 0){step_path = 1;}
+                            second_path = second_path.substr(step_path);
+                            if(second_path.indexOf(".") === -1){second_path = "."+second_path;}
+                            var ifcurval = first_path + String.fromCharCode(e.charCode) + second_path;
+                            $(this).val((1*ifcurval).toFixed(fraction));
+                            $(this).setCursorPosition(cur_pos+1);
+                        }
+                        return false;
+                    }else{
+                        var cur_pos = this.selectionStart;
+                        var cur_val = $(this).val();
+                        var first_path = cur_val.substr(0, cur_pos);
+                        var second_path = cur_val.substr(cur_pos, (cur_val.length - 1*cur_pos));
+                        var all_path = first_path + String.fromCharCode(e.charCode) + second_path;
+                        var fraction_path = all_path.substr(all_path.indexOf(".") + 1);
+                        if(fraction_path.length > fraction){all_path = all_path.substr(0, all_path.length - 1);}
+                        $(this).val((1 * (all_path)).toFixed(fraction)); $(this).setCursorPosition(cur_pos+1); return false;
+                    }
+                }else{return false;}
+            });
+
+        }
+JS;
+
+        Yii::$app->view->registerJs($jsTag);
+
+    }
+
+    }
 ?>

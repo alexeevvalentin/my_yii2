@@ -43,3 +43,22 @@ $f_j_arr_full = Json::decode($file_json_full);
 <div style="padding-top:3px;padding-bottom:12px;">
     <?php tag::ecocombo('model', 'kladr', $f_j_arr_full, ['placeholder'=>'Выберите объект кладера', 'style'=>'width:300px;'], null, ""); ?>
 </div>
+
+<div>
+    <div style="font-weight:bold;">select_monitor</div>
+    <div style="font-style:italic;">Монитор выбора, идет "в связке" с ecocombo, необходим для множественное выбора из ecocombo (Связано с регистронезависимым поисковиком где name="kladr_i")</div>
+</div>
+<div style="padding-top:3px;padding-bottom:12px;">
+    <?php tag::select_monitor('model', 'kladr_i', 'monitor_kladr_i'); ?>
+</div>
+
+<div>
+    <div style="font-weight:bold;">monetary_field</div>
+    <div style="font-style:italic;">Double формат, разделитель "."</div>
+</div>
+<div style="padding-top:3px;padding-bottom:12px;">
+    <?php tag::monetary_field('model', 'monetary', 12,3); ?>
+</div>
+
+
+

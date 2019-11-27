@@ -423,7 +423,12 @@ JS;
 
             var current_list;
             
-            selector.keyup(function(){
+            selector.keyup(function(e){
+
+                if(e.keyCode === 40 || e.keyCode === 38){
+                    return false;
+                }
+                
                 $(this).attr('code', '');
                 $(this).attr('value', '');
                 if($('#'+selector.attr('id')+'_list').length > 0){ $('#'+selector.attr('id')+'_list').remove(); }
@@ -444,7 +449,7 @@ JS;
                 source = arr_sorti_local(source);
                 
                 var list_id = selector.attr('id')+'_list';
-                var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;z-index:1000;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 5)+'px;max-height:192px;"></div>';
+                var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;z-index:1000;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 5)+'px;max-height:'+(26*max_show)+'px;"></div>';
                 selector.parent().append(list_html);
                 
                 var list_selector_filter = $('#'+list_id);
@@ -486,7 +491,11 @@ JS;
             });
             
             $(document).keydown(function(e){
-                if($('#'+selector.attr('id')+'_list').length > 0){
+                var selector_list = $('#'+selector.attr('id')+'_list');
+                if(selector_list.length > 0){
+                    
+                    
+                    
                     if(e.keyCode === 40){
                         var onmo;
                         var index_select = -1;
@@ -496,6 +505,7 @@ JS;
                             if(onmo.search(new RegExp(rgb_to_hex($(el).css('backgroundColor')), "i")) !==-1 ){
                                 index_select = 1*i+1;
                                 if(selector_row.eq(index_select).length > 0){
+                                    selector_list.scrollTop(1*selector_list.scrollTop()+26);
                                     selector_row.eq(i).css('backgroundColor', '#FFFFFF');
                                 }
                             }
@@ -511,6 +521,7 @@ JS;
                             if(onmo.search(new RegExp(rgb_to_hex($(el).css('backgroundColor')), "i")) !==-1 ){
                                 index_select = 1*i-1;
                                 if(selector_row.eq(index_select).length > 0){
+                                    selector_list.scrollTop(1*selector_list.scrollTop()-26);
                                     selector_row.eq(i).css('backgroundColor', '#FFFFFF');
                                 }
                             }
@@ -727,8 +738,6 @@ JS;
         $tag_source = '<input type="text" id="'.$this_id.'" name="'.$class_name.'['.$name.']" '.$options.' value="'.$set_value.'" placeholder="'.$plshold.'" />';
 
         echo $tag_source;
-
-        //echo '<script> monetary_field("' . $this_id . '", ' . $this_total . ', ' . $this_fraction . ', "' . $ost . '"); </script>';
 
         $jsTag =<<<JS
         

@@ -41,7 +41,7 @@ $f_j_arr_full = Json::decode($file_json_full);
     <div style="font-style:italic;">Экономичное combo (select), на 228818 строк данных (полный набор данных KLADR.DBF)(Поиск регистрозависимый)</div>
 </div>
 <div style="padding-top:3px;padding-bottom:12px;">
-    <?php tag::ecocombo('model', 'kladr', $f_j_arr_full, ['placeholder'=>'Выберите объект кладера', 'style'=>'width:300px;'], null, ""); ?>
+    <?php tag::ecocombo('model', 'kladr', $f_j_arr_full, ['placeholder'=>'Выберите объект кладера', 'style'=>'width:300px;'], null, "", 100, 3); ?>
 </div>
 
 <div>

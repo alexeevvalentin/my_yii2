@@ -226,7 +226,7 @@ JS;
             
             var source;
             var O_K_source;
-            
+
             if(selector.attr('data') === '' || selector.attr('data') === undefined){}else{
                 source = JSON.parse(selector.attr('data'));
                 source = arr_sorti_local(source);
@@ -235,7 +235,7 @@ JS;
 
             var this_id = selector.attr("id")+"_btn";
             selector.parent().append('<div id="'+this_id+'" class="ecocombo_btn" style="position:relative;left:'+(selector.width()-16)+'px;top:-24px;width:18px;height:16px;font-size:9px;cursor:pointer;text-align:center;padding-top:5px;">&#9660;</div>');
-            var this_selector = $('#'+this_id);
+            var button_selector = $('#'+this_id);
 
             function arr_sorti_local(arr, sort_stb = 0){
                 var sortable = [];
@@ -423,11 +423,32 @@ JS;
 
             var current_list;
             
+            var last_event_mover;
+            
+            $(document).on("mouseover", 
+                "#"+selector.attr("id")+"_list", 
+                function(e){
+                    if(e.originalEvent !== undefined){
+                        if(last_event_mover === 0){
+                            $("."+selector.attr("id")+"_list_option_row").css('backgroundColor', '#FFFFFF');
+                        }
+                        last_event_mover = 1;
+                    }else{
+                        last_event_mover = 0;
+                    }
+                }
+            );
+            
+            
+            
             selector.keyup(function(e){
 
                 if(e.keyCode === 40 || e.keyCode === 38){
                     return false;
                 }
+
+                button_selector.attr('diap_s', '');
+                button_selector.attr('diap_e', '');
                 
                 $(this).attr('code', '');
                 $(this).attr('value', '');
@@ -455,8 +476,8 @@ JS;
                 var list_selector_filter = $('#'+list_id);
                 list_selector_filter.mouseleave(function(){ $(this).remove(); });
                 var fl_hover_list = 0;var fl_hover_btn = 0;var fl_hover_genselector = 0;
-                this_selector.unbind('mouseenter').unbind('mouseleave');
-                this_selector.hover(
+                button_selector.unbind('mouseenter').unbind('mouseleave');
+                button_selector.hover(
                     function() {
                         fl_hover_btn = 1;
                     }, function() {
@@ -493,13 +514,11 @@ JS;
             $(document).keydown(function(e){
                 var selector_list = $('#'+selector.attr('id')+'_list');
                 if(selector_list.length > 0){
-                    
-                    
-                    
                     if(e.keyCode === 40){
                         var onmo;
                         var index_select = -1;
                         var selector_row = $('.'+selector.attr('id')+'_list_option_row');
+                        var fl_overlim = 0;
                         selector_row.each(function(i, el){
                             onmo = $(el).attr('onmouseover');
                             if(onmo.search(new RegExp(rgb_to_hex($(el).css('backgroundColor')), "i")) !==-1 ){
@@ -507,27 +526,50 @@ JS;
                                 if(selector_row.eq(index_select).length > 0){
                                     selector_list.scrollTop(1*selector_list.scrollTop()+26);
                                     selector_row.eq(i).css('backgroundColor', '#FFFFFF');
+                                }else{
+                                    if(button_selector.attr('diap_s')!==''){
+                                        combo_step_scroll(selector_list, button_selector, source, 1);
+                                        index_select = 1*i;
+                                        fl_overlim = 1;
+                                        return false;
+                                    }
                                 }
                             }
                         });
                         if(index_select === -1){index_select = 0;}
-                        selector_row.eq(index_select).mouseover();
+                        if(fl_overlim === 0){
+                            selector_row.eq(index_select).mouseover();
+                        }else{
+                            $('.'+selector.attr('id')+'_list_option_row').eq(index_select).mouseover();
+                        }
                     }else if(e.keyCode === 38){
                         var onmo;
                         var index_select = -1;
                         var selector_row = $('.'+selector.attr('id')+'_list_option_row');
+                        var fl_overlim = 0;
                         selector_row.each(function(i, el){
                             onmo = $(el).attr('onmouseover');
                             if(onmo.search(new RegExp(rgb_to_hex($(el).css('backgroundColor')), "i")) !==-1 ){
                                 index_select = 1*i-1;
-                                if(selector_row.eq(index_select).length > 0){
+                                if(index_select >= 0){
                                     selector_list.scrollTop(1*selector_list.scrollTop()-26);
                                     selector_row.eq(i).css('backgroundColor', '#FFFFFF');
+                                }else{
+                                    if(button_selector.attr('diap_s')!==''){
+                                        combo_step_scroll(selector_list, button_selector, source, 2);
+                                        index_select = 0;
+                                        fl_overlim = 1;
+                                        return false;
+                                    }
                                 }
                             }
                         });
                         if(index_select === -1){index_select = 0;}
-                        selector_row.eq(index_select).mouseover();
+                        if(fl_overlim === 0){
+                            selector_row.eq(index_select).mouseover();
+                        }else{
+                            $('.'+selector.attr('id')+'_list_option_row').eq(index_select).mouseover();
+                        }
                     }else if(e.keyCode === 13){
                         var onmo;
                         var selector_row = $('.'+selector.attr('id')+'_list_option_row');
@@ -549,7 +591,7 @@ JS;
             $(document).on("click", "."+selector.attr("id")+"_list_option_row", function(){
     
                 selector.attr('code', $(this).attr('code'));
-    
+
                 if($(this).children('div').eq(0).html()!==''){
                     selector.val($(this).children('div').eq(0).html()+' - '+$(this).children('div').eq(1).html());
                     selector.attr('value', $(this).attr('code'));
@@ -568,7 +610,11 @@ JS;
             
             var current_value;
             
-            this_selector.click(function(){
+            button_selector.click(function(){
+                
+                if($('#'+selector.attr('id')+'_list').length > 0){
+                    $('#'+selector.attr('id')+'_list').remove();
+                }
                 
                 current_value = selector.val();
                 var dtext = selector.attr('data');
@@ -663,10 +709,10 @@ JS;
                         e.preventDefault();
                         if(e.originalEvent.wheelDelta < 0 || e.originalEvent.detail > 0) {
                             //scroll down
-                            combo_step_scroll($(this), this_selector, source, 1);
+                            combo_step_scroll($(this), button_selector, source, 1);
                         } else {
                             //scroll up
-                            combo_step_scroll($(this), this_selector, source, 2);
+                            combo_step_scroll($(this), button_selector, source, 2);
                         }
                     });
                     

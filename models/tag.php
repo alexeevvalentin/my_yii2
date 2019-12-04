@@ -213,22 +213,32 @@ JS;
             }
         }
 
-        $tag_source = '<input type="text" id="'.$this_id.'" name="'.$class_name.'['.$name.']" '.$options.' data=\''.htmlspecialchars($data).'\' value="'.$set_value.'" />';
+        //$data = htmlspecialchars($data);
+
+        $tag_source = '<input type="text" id="'.$this_id.'" name="'.$class_name.'['.$name.']" '.$options.' value="'.$set_value.'" />';
 
         echo $tag_source;
 
         $jsTag =<<<JS
 
-        var selector_this_id = $("#$this_id");
-        ecocombo(selector_this_id, "$search_case", $max_count, $max_show);
         
-        function ecocombo(selector, s_case, max_count=100, max_show=8){
-            
+        var selector_this_id = $("#$this_id");
+        
+        var p_search_case = "$search_case"; 
+        var p_max_count = $max_count;
+        var p_max_show = $max_show;
+        var p_data = $data;
+
+        //ecocombo(selector_this_id, p_search_case, p_max_count, p_max_show, p_data);
+
+        var anon_ecocombo_$this_id = function(selector, s_case, max_count=100, max_show=8, data_in=''){
+
             var source;
             var O_K_source;
 
-            if(selector.attr('data') === '' || selector.attr('data') === undefined){}else{
-                source = JSON.parse(selector.attr('data'));
+            if(data_in === '' || data_in === undefined){}else{
+                data_in = JSON.stringify(data_in);
+                source = JSON.parse(data_in);
                 source = arr_sorti_local(source);
                 O_K_source = Object.keys(source);
             }
@@ -255,12 +265,6 @@ JS;
                         if(O_K_source[diap_e] === undefined){
                             return false;
                         }
-
-                        /*
-                        if(Object.keys(cdata)[diap_e] === undefined){
-                            return false;
-                        }
-                        */
                         
                         cbutton.attr('diap_s', diap_s);
                         cbutton.attr('diap_e', diap_e);
@@ -273,13 +277,6 @@ JS;
                             }
                         }
                         
-                        /*
-                        for(var i = diap_s; i < 1*diap_e; i++){
-                            if(Object.keys(cdata)[i] !== undefined){
-                                clist.append('<div class="'+list_id+'_option_row" code="'+cdata[Object.keys(cdata)[i]][1]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+cdata[Object.keys(cdata)[i]][1]+'</div><div style="display:table-cell;padding:3px;text-overflow:ellipsis;">'+cdata[Object.keys(cdata)[i]][2]+'</div></div>');
-                            }
-                        }
-                        */
                     }else if(fl === 2){
                         diap_s = 1*cbutton.attr('diap_s') - 1;
                         diap_e = 1*cbutton.attr('diap_e') - 1;
@@ -297,13 +294,6 @@ JS;
                             }
                         }
 
-                        /*
-                        for(var i = diap_s; i < 1*diap_e; i++){
-                            if(Object.keys(cdata)[i] !== undefined){
-                                clist.append('<div class="'+list_id+'_option_row" code="'+cdata[Object.keys(cdata)[i]][1]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+cdata[Object.keys(cdata)[i]][1]+'</div><div style="display:table-cell;padding:3px;text-overflow:ellipsis;">'+cdata[Object.keys(cdata)[i]][2]+'</div></div>');
-                            }
-                        }
-                        */
                     }
                 }
             }
@@ -453,15 +443,14 @@ JS;
                 $(this).attr('code', '');
                 $(this).attr('value', '');
                 if($('#'+selector.attr('id')+'_list').length > 0){ $('#'+selector.attr('id')+'_list').remove(); }
-                var data_text = selector.attr('data');
-                if(data_text === undefined){return false;}
+                if(data_in === undefined){return false;}
                 var data_text_clear = '';
                 var cur_value = $(this).val();
                 
                 if(s_case === 'i'){
-                    data_text_clear = recurs_data_list_i(data_text, cur_value, undefined);
+                    data_text_clear = recurs_data_list_i(data_in, cur_value, undefined);
                 }else{
-                    data_text_clear = recurs_data_list(data_text, cur_value, undefined);
+                    data_text_clear = recurs_data_list(data_in, cur_value, undefined);
                 }
 
                 if(data_text_clear === false){return false;}
@@ -617,8 +606,7 @@ JS;
                 }
                 
                 current_value = selector.val();
-                var dtext = selector.attr('data');
-                var dpos = dtext.indexOf(current_value);
+                var dpos = data_in.indexOf(current_value);
                 
                 if(dpos !== -1 && current_value.trim() !== ''){
                     selector.parent().append(current_list);
@@ -666,7 +654,7 @@ JS;
                     var attr_e = $(this).attr('diap_e');
                     $(this).attr('diap_s', 0);
                     $(this).attr('diap_e', max_show);
-                    if(selector.attr('data') === '' || selector.attr('data') === undefined){return false;}
+                    if(data_in === '' || data_in === undefined){return false;}
                     
                     var list_id = selector.attr('id')+'_list';
                     var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;z-index:1000;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 5)+'px;"></div>';
@@ -724,18 +712,13 @@ JS;
                             $(this).attr('diap_e', 1*i);
                             break;
                         }
-                        
-                        /*
-                        if(Object.keys(source)[i] !== undefined){
-                            list_selector.append('<div class="'+list_id+'_option_row" code="'+source[Object.keys(source)[i]][1]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:21px;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+source[Object.keys(source)[i]][1]+'</div><div style="display:table-cell;padding:3px;">'+source[Object.keys(source)[i]][2]+'</div></div>');
-                        }else{
-                            $(this).attr('diap_e', 1*i);
-                            break;
-                        }*/
                     }
                 }
             });
         }
+
+        anon_ecocombo_$this_id(selector_this_id, p_search_case, p_max_count, p_max_show, p_data);
+        
 JS;
 
         Yii::$app->view->registerJs($jsTag);
@@ -910,7 +893,6 @@ JS;
                     }
                 }else{return false;}
             });
-
         }
 JS;
 

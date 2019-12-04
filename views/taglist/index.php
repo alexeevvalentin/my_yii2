@@ -50,7 +50,7 @@ $f_j_arr_full = $file_json_full;
     <div style="font-style:italic;">Монитор выбора, идет "в связке" с ecocombo, необходим для множественное выбора из ecocombo (Связано с регистронезависимым поисковиком где name="kladr_i")</div>
 </div>
 <div style="padding-top:3px;padding-bottom:12px;">
-    <?php tag::select_monitor('model', 'kladr_i', 'monitor_kladr_i'); ?>
+    <?php tag::select_monitor('model', 'kladr_i', 'monitor_kladr_i', $f_j_arr_full); ?>
 </div>
 
 <div>

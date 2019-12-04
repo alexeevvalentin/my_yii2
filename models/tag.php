@@ -50,9 +50,18 @@ class tag extends Model
         return $str_new;
     }
 
-    public static function select_monitor($model, $id_commun, $name, $options='', $set_value=null){
+    public static function select_monitor($model, $id_commun, $name, $data_commun, $options='', $set_value=null){
 
         $this_id = self::tag_symb($name);
+
+        if(is_array($data_commun) || is_object($data_commun)){
+            foreach($data_commun as $k=>$v){
+                if(is_string($v)){
+                    $data_commun[$k] = htmlspecialchars($v);
+                }
+            }
+            $data_commun = Json::encode($data_commun);
+        }
 
         if(is_string($model)){
             $class_name = $model;
@@ -133,7 +142,8 @@ class tag extends Model
             });
             
             sel_commun.change(function(){
-                var data_commun = JSON.parse($(this).attr("data"));
+                var data_c = JSON.stringify($data_commun);
+                var data_commun = JSON.parse(data_c);
                 var this_code = $(this).attr("code");
                 class_del_button = "del_"+"$this_id";
                 sel_this = $("#$this_id");
@@ -428,9 +438,7 @@ JS;
                     }
                 }
             );
-            
-            
-            
+
             selector.keyup(function(e){
 
                 if(e.keyCode === 40 || e.keyCode === 38){
@@ -578,7 +586,7 @@ JS;
             }
             
             $(document).on("click", "."+selector.attr("id")+"_list_option_row", function(){
-    
+
                 selector.attr('code', $(this).attr('code'));
 
                 if($(this).children('div').eq(0).html()!==''){
@@ -715,7 +723,7 @@ JS;
                     }
                 }
             });
-        }
+        };
 
         anon_ecocombo_$this_id(selector_this_id, p_search_case, p_max_count, p_max_show, p_data);
         

@@ -68,7 +68,7 @@ foreach($arr_s as $k=>$v){
             <?php tag::ecocombo($model_b, 'book', $a_b, ['placeholder'=>'Выберите книгу']); ?>
         </div>
         <div>
-            <?php tag::select_monitor($model_b, 'book', 'book_monitor'); ?>
+            <?php tag::select_monitor($model_b, 'book', 'book_monitor', $a_b); ?>
         </div>
     </div>
 
@@ -78,7 +78,7 @@ foreach($arr_s as $k=>$v){
             <?php tag::ecocombo($model_a, 'author', $a_a, ['placeholder'=>'Выберите автора']); ?>
         </div>
         <div>
-            <?php tag::select_monitor($model_a, 'author', 'author_monitor'); ?>
+            <?php tag::select_monitor($model_a, 'author', 'author_monitor', $a_a); ?>
         </div>
     </div>
 
@@ -88,7 +88,7 @@ foreach($arr_s as $k=>$v){
             <?php tag::ecocombo($model_s, 'shop', $a_s, ['placeholder'=>'Выберите магазин']); ?>
         </div>
         <div>
-            <?php tag::select_monitor($model_s, 'shop', 'shop_monitor'); ?>
+            <?php tag::select_monitor($model_s, 'shop', 'shop_monitor', $a_s); ?>
         </div>
     </div>
 

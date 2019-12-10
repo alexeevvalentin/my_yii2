@@ -127,13 +127,18 @@ class tag extends Model
             }
             sel_this.append(source_this);
 
-            var IEArrToObject__$this_id = function(arr) {
-                var rv = {};
-                for (var i = 0; i < arr.length; ++i){
-                    rv[i] = arr[i];
-                }
-                return rv;
-            };
+            var isIE = false || !!document.documentMode;
+            var isEdge = !isIE && !!window.StyleMedia;
+            
+            if(isIE !== false || isEdge !== false){
+                var IEArrToObject__$this_id = function(arr) {
+                    var rv = {};
+                    for (var i = 0; i < arr.length; ++i){
+                        rv[i] = arr[i];
+                    }
+                    return rv;
+                };
+            }
             
             $(document).on("click", "."+class_del_button, function(){
                 class_del_button = "del_"+"$this_id";
@@ -143,9 +148,7 @@ class tag extends Model
                 var code_val = $(this).attr("code");
                 $("#"+class_del_button+"_"+code_val).remove();
                 var runtime_val = JSON.parse(sel_this.attr("value"));
-                
-                var isIE = false || !!document.documentMode;
-                var isEdge = !isIE && !!window.StyleMedia;
+
                 if(isIE === false && isEdge === false){
                     runtime_val = Object.assign({}, runtime_val);
                 }else{
@@ -169,8 +172,6 @@ class tag extends Model
                     sel_this.append("<div style='display:table;' class='"+class_del_button+"_str' id='"+class_del_button+"_"+this_code+"' ><div style='display:table-cell;padding:3px;'>"+data_commun[this_code]+"</div><div class='"+class_del_button+"' code='"+this_code+"' style='display:table-cell;padding:3px;cursor:pointer;'>&#9746;</div></div>");
                     var runtime_val = JSON.parse(sel_this.attr("value"));
                     
-                    var isIE = false || !!document.documentMode;
-                    var isEdge = !isIE && !!window.StyleMedia;
                     if(isIE === false && isEdge === false){
                         runtime_val = Object.assign({}, runtime_val);
                     }else{

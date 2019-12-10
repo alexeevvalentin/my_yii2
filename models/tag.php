@@ -127,6 +127,13 @@ class tag extends Model
             }
             sel_this.append(source_this);
 
+            function IEArrToObject(arr) {
+                var rv = {};
+                for (var i = 0; i < arr.length; ++i)
+                    rv[i] = arr[i];
+                return rv;
+            }
+            
             $(document).on("click", "."+class_del_button, function(){
                 class_del_button = "del_"+"$this_id";
                 sel_this = $("#$this_id");
@@ -135,7 +142,15 @@ class tag extends Model
                 var code_val = $(this).attr("code");
                 $("#"+class_del_button+"_"+code_val).remove();
                 var runtime_val = JSON.parse(sel_this.attr("value"));
-                runtime_val = Object.assign({}, runtime_val);
+                
+                var isIE = false || !!document.documentMode;
+                var isEdge = !isIE && !!window.StyleMedia;
+                if(isIE === false && isEdge === false){
+                    runtime_val = Object.assign({}, runtime_val);
+                }else{
+                    runtime_val = IEArrToObject(runtime_val);
+                }
+                
                 delete runtime_val[code_val];
                 sel_this.attr("value", JSON.stringify(runtime_val));
                 $("#"+this_id_hide).val(JSON.stringify(runtime_val));
@@ -152,7 +167,15 @@ class tag extends Model
                 if($("#"+class_del_button+"_"+this_code).length === 0 && this_code !== '' && this_code !== undefined){
                     sel_this.append("<div style='display:table;' class='"+class_del_button+"_str' id='"+class_del_button+"_"+this_code+"' ><div style='display:table-cell;padding:3px;'>"+data_commun[this_code]+"</div><div class='"+class_del_button+"' code='"+this_code+"' style='display:table-cell;padding:3px;cursor:pointer;'>&#9746;</div></div>");
                     var runtime_val = JSON.parse(sel_this.attr("value"));
-                    runtime_val = Object.assign({}, runtime_val);
+                    
+                    var isIE = false || !!document.documentMode;
+                    var isEdge = !isIE && !!window.StyleMedia;
+                    if(isIE === false && isEdge === false){
+                        runtime_val = Object.assign({}, runtime_val);
+                    }else{
+                        runtime_val = IEArrToObject(runtime_val);
+                    }
+                    
                     runtime_val[''+this_code] = data_commun[this_code];
                     sel_this.attr("value", JSON.stringify(runtime_val));
                     $("#"+this_id_hide).val(JSON.stringify(runtime_val));
@@ -241,8 +264,12 @@ JS;
 
         //ecocombo(selector_this_id, p_search_case, p_max_count, p_max_show, p_data);
 
-        var anon_ecocombo_$this_id = function(selector, s_case, max_count=100, max_show=8, data_in=''){
+        var anon_ecocombo_$this_id = function(selector, s_case, max_count, max_show, data_in){
 
+            max_count = max_count || 100; 
+            max_show = max_show || 8; 
+            data_in = data_in || '';
+            
             var source;
             var O_K_source;
 
@@ -257,7 +284,10 @@ JS;
             selector.parent().append('<div id="'+this_id+'" class="ecocombo_btn" style="position:relative;left:'+(selector.width()-16)+'px;top:-24px;width:18px;height:16px;font-size:9px;cursor:pointer;text-align:center;padding-top:5px;">&#9660;</div>');
             var button_selector = $('#'+this_id);
 
-            function arr_sorti_local(arr, sort_stb = 0){
+            function arr_sorti_local(arr, sort_stb){
+                
+                sort_stb = sort_stb || 0;
+                
                 var sortable = [];
                 for (var vehicle in arr) {sortable.push([1*vehicle, vehicle, arr[vehicle]]);}
                 sortable.sort(function(a, b) {return a[sort_stb] - b[sort_stb]});
@@ -308,7 +338,9 @@ JS;
                 }
             }
             
-            function recurs_data_list_i(data_text, cur_value, final_text, step=0){
+            function recurs_data_list_i(data_text, cur_value, final_text, step){
+                
+                step = step || 0;
                 
                 step = step + 1;
                 
@@ -366,7 +398,9 @@ JS;
                 }
             }
     
-            function recurs_data_list(data_text, cur_value, final_text, step=0){
+            function recurs_data_list(data_text, cur_value, final_text, step){
+                
+                step = step || 0;
                 
                 step = step + 1;
                 

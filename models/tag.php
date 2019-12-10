@@ -70,7 +70,7 @@ class tag extends Model
         }
 
         if($options === ''){
-            $options = 'style="width:100%;min-height:150px;overflow:auto;background-color:#E4E4E4;border: 3px solid #A5A5A5;border-radius:8px;"';
+            $options = 'style="width:100%;height:150px;overflow:auto;background-color:#E4E4E4;border: 3px solid #A5A5A5;border-radius:8px;"';
         }
 
         if(is_array($options)){

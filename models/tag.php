@@ -263,9 +263,7 @@ JS;
         var p_max_count = $max_count;
         var p_max_show = $max_show;
         var p_data = $data;
-
-        //ecocombo(selector_this_id, p_search_case, p_max_count, p_max_show, p_data);
-
+        
         var anon_ecocombo_$this_id = function(selector, s_case, max_count, max_show, data_in){
 
             max_count = max_count || 100; 

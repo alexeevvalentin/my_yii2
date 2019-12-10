@@ -163,7 +163,7 @@ class tag extends Model
                 class_del_button = "del_"+"$this_id";
                 sel_this = $("#$this_id");
                 this_id_hide = "$this_id"+"_hide";
-                
+
                 if($("#"+class_del_button+"_"+this_code).length === 0 && this_code !== '' && this_code !== undefined){
                     sel_this.append("<div style='display:table;' class='"+class_del_button+"_str' id='"+class_del_button+"_"+this_code+"' ><div style='display:table-cell;padding:3px;'>"+data_commun[this_code]+"</div><div class='"+class_del_button+"' code='"+this_code+"' style='display:table-cell;padding:3px;cursor:pointer;'>&#9746;</div></div>");
                     var runtime_val = JSON.parse(sel_this.attr("value"));
@@ -630,7 +630,9 @@ JS;
                     selector.val($(this).children('div').eq(1).html());
                     selector.attr('value', $(this).attr('code'));
                 }
+                
                 selector.change();
+                
                 if($('#'+selector.attr('id')+'_list').length > 0){
                     $('#'+selector.attr('id')+'_list').remove();
                 }

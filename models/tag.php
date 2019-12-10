@@ -127,12 +127,13 @@ class tag extends Model
             }
             sel_this.append(source_this);
 
-            function IEArrToObject(arr) {
+            var IEArrToObject__$this_id = function(arr) {
                 var rv = {};
-                for (var i = 0; i < arr.length; ++i)
+                for (var i = 0; i < arr.length; ++i){
                     rv[i] = arr[i];
+                }
                 return rv;
-            }
+            };
             
             $(document).on("click", "."+class_del_button, function(){
                 class_del_button = "del_"+"$this_id";
@@ -148,7 +149,7 @@ class tag extends Model
                 if(isIE === false && isEdge === false){
                     runtime_val = Object.assign({}, runtime_val);
                 }else{
-                    runtime_val = IEArrToObject(runtime_val);
+                    runtime_val = IEArrToObject__$this_id(runtime_val);
                 }
                 
                 delete runtime_val[code_val];
@@ -173,7 +174,7 @@ class tag extends Model
                     if(isIE === false && isEdge === false){
                         runtime_val = Object.assign({}, runtime_val);
                     }else{
-                        runtime_val = IEArrToObject(runtime_val);
+                        runtime_val = IEArrToObject__$this_id(runtime_val);
                     }
                     
                     runtime_val[''+this_code] = data_commun[this_code];

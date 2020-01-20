@@ -2829,7 +2829,7 @@ class regression extends Model
         foreach($key_Z as $k1=>$v1){
             $cur_coef = $data_regression['Coef_regr'][$v1][array_keys($data_regression['Coef_regr'][$v1])[0]];
             if(isset($Head_name[$v1])){
-                $description_coef_reg = $description_coef_reg.'<div>'.$Head_name[$v1].': <span class="span_bold">'.$cur_coef.'</span></div>';
+                $description_coef_reg = $description_coef_reg.'<div>Коэффициент при '.$Head_name[$v1].': <span class="span_bold">'.$cur_coef.'</span></div>';
                 $key_Z_clear_val[$v1] = $cur_coef;
             }else{
                 $description_coef_reg = $description_coef_reg.'<div>Свободный коэффициент: <span class="span_bold">'.$cur_coef.'</span></div>';

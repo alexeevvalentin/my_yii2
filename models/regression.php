@@ -3183,18 +3183,6 @@ class regression extends Model
         $str_regression = self::print_regression_analisys($data_regression, $Y, $Z, $Head_name);
         $report['print_regression'] = $str_regression;
 
-        print_r($report);
-
-        /*
-        $regression_result = self::calculate_regression($Y, $Z);
-        $coef_elast = [];
-        foreach($regression_result['Z_coef'] as $k=>$v){
-            $coef_elast[$k] = $v*($regression_result['Z_avg'][$k]/$regression_result['Y_avg']);
-        }
-
-        print_r($coef_elast);
-        */
-
     }
 
 }

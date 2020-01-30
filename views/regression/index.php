@@ -11,6 +11,7 @@ use yii\helpers\Json;
 use yii\helpers\Url;
 use app\models\matrix;
 use app\models\regression;
+use app\models\dialog;
 
 //$A = [[2,6,5],[-1,9,8],[8,0,2]];
 //$B = [[8]];
@@ -43,20 +44,22 @@ $X2_key_1_full = [['coef'=>1,'keyX2'=>445.4],['coef'=>1,'keyX2'=>486.6],['coef'=
 
 $X2_fall = [['coef'=>445.4,'keyX2'=>445.4],['coef'=>486,'keyX2'=>486.6],['coef'=>507,'keyX2'=>507],['coef'=>524,'keyX2'=>524.4],['coef'=>1,'keyX2'=>515.2],['coef'=>1,'keyX2'=>548.2],['coef'=>1,'keyX2'=>572.6],['coef'=>1,'keyX2'=>548.2],['coef'=>1,'keyX2'=>591.5],['coef'=>1,'keyX2'=>609.8],['coef'=>1,'keyX2'=>601.7],['coef'=>1,'keyX2'=>635.9],['coef'=>1,'keyX2'=>633.6],['coef'=>1,'keyX2'=>643.8],['coef'=>1,'keyX2'=>707.9],['coef'=>1,'keyX2'=>678],['coef'=>1,'keyX2'=>722.6],['coef'=>1,'keyX2'=>701.7],['coef'=>1,'keyX2'=>738.8],['coef'=>1,'keyX2'=>807.5],['coef'=>1,'keyX2'=>843.6],['coef'=>1,'keyX2'=>866.3],['coef'=>1,'keyX2'=>843.3],['coef'=>1,'keyX2'=>874.4],['coef'=>1,'keyX2'=>887.5],['coef'=>1,'keyX2'=>893.3],['coef'=>1,'keyX2'=>921.4],   ['coef'=>1,'keyX2'=>930.8],['coef'=>1,'keyX2'=>1009.2],['coef'=>1,'keyX2'=>1119.3]];
 
-//echo '<xmp>';
 
-echo regression::report_regression($Y_key_full, $X2_key_full, '1',['keyY'=>'Ключ Y', 'keyX1'=>'Ключ X1', 'keyX2'=>'Ключ X2'], [['coef'=>1,'keyX2'=>1010], ['coef'=>1,'keyX2'=>1021]]);
 
-//X: $X2_key_full
-//Z: $X2_key_1_full
+regression::report_regression($Y_key_full, $X2_key_full, '1',['keyY'=>'Ключ Y', 'keyX1'=>'Ключ X1', 'keyX2'=>'Ключ X2'], [['coef'=>1,'keyX2'=>1010], ['coef'=>1,'keyX2'=>1021]]);
 
-//echo matrix::my_det([[1,2,3],[4,5,6],[7,8,9]]);
-//echo matrix::my_det([[-2,1,3,2],[3,0,-1,2],[-5,2,3,0],[4,-1,2,-3]]);
-//echo matrix::matrix_determinant([[-2,1,3,2],[3,0,-1,2],[-5,2,3,0],[4,-1,2,-3]]);
+echo '<input type="button" value="show" id="show_btn"/>';
 
-//print_r(regression::calculate_correlation_analisys($Y_full, $Z_full));
-//print_r(regression::calculate_regression($Y, $X2_1));
+$dial_1 = new dialog('test_id');
+$dial_1->set_dialog_style('background-color:orange;min-width:440px;');
+//$dial_1->set_source('<div style="padding:3px;background-color:yellow;">fdgsdfgsdfg</div>');
+//$dial_1->set_dialog();
 
-//echo '</xmp>';
+//$dial_1->on_show_hide('show_btn');
+
+$dial_1->set_template('input_regression_data');
+
+$dial_1->on_show_hide('show_btn');
+
 
 ?>

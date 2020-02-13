@@ -209,9 +209,9 @@ JS;
 
     public function set_template($name_template, $draggable = 1){
         if($this->event_set === 0) {
-            $this_base_path = Yii::$app->basePath . '\views\dialogs\\' . $name_template;
-            $result_html = require_once($this_base_path . '\html_source.php');
-            $result_jquery = require_once($this_base_path . '\jquery_source.php');
+            $this_base_path = Yii::$app->basePath . '/views/dialogs/' . $name_template;
+            $result_html = require_once($this_base_path . '/html_source.php');
+            $result_jquery = require_once($this_base_path . '/jquery_source.php');
             $this->set_source($result_html);
             $this->set_dialog($draggable);
             $this->set_jquery_code($result_jquery);

@@ -365,6 +365,7 @@ $("#$this->base_id"+"_rec_dialog_datasource").click(function(){
     if (fl_break === 0){
         if(fl_data == 1){
             selector_input_dialog_data.html(JSON.stringify(json_arr));
+            $("#"+"$this->base_id").trigger("$this->base_id"+"_rec_dialog_complete", [json_arr]);
             data_source_dialog.html('');
             $("#"+"$this->base_id"+"_controll_btn_x_close").click();
             
@@ -385,9 +386,6 @@ $("#$this->base_id").on("pre_x_close_"+"$this->base_id", function(){
 });
 
 JS;
-
-
-
 
 return $cur_jquery_code;
 

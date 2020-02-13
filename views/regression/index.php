@@ -12,6 +12,7 @@ use yii\helpers\Url;
 use app\models\matrix;
 use app\models\regression;
 use app\models\dialog;
+use app\models\graph_canvas;
 
 //$A = [[2,6,5],[-1,9,8],[8,0,2]];
 //$B = [[8]];
@@ -44,22 +45,19 @@ $X2_key_1_full = [['coef'=>1,'keyX2'=>445.4],['coef'=>1,'keyX2'=>486.6],['coef'=
 
 $X2_fall = [['coef'=>445.4,'keyX2'=>445.4],['coef'=>486,'keyX2'=>486.6],['coef'=>507,'keyX2'=>507],['coef'=>524,'keyX2'=>524.4],['coef'=>1,'keyX2'=>515.2],['coef'=>1,'keyX2'=>548.2],['coef'=>1,'keyX2'=>572.6],['coef'=>1,'keyX2'=>548.2],['coef'=>1,'keyX2'=>591.5],['coef'=>1,'keyX2'=>609.8],['coef'=>1,'keyX2'=>601.7],['coef'=>1,'keyX2'=>635.9],['coef'=>1,'keyX2'=>633.6],['coef'=>1,'keyX2'=>643.8],['coef'=>1,'keyX2'=>707.9],['coef'=>1,'keyX2'=>678],['coef'=>1,'keyX2'=>722.6],['coef'=>1,'keyX2'=>701.7],['coef'=>1,'keyX2'=>738.8],['coef'=>1,'keyX2'=>807.5],['coef'=>1,'keyX2'=>843.6],['coef'=>1,'keyX2'=>866.3],['coef'=>1,'keyX2'=>843.3],['coef'=>1,'keyX2'=>874.4],['coef'=>1,'keyX2'=>887.5],['coef'=>1,'keyX2'=>893.3],['coef'=>1,'keyX2'=>921.4],   ['coef'=>1,'keyX2'=>930.8],['coef'=>1,'keyX2'=>1009.2],['coef'=>1,'keyX2'=>1119.3]];
 
-
-
 regression::report_regression($Y_key_full, $X2_key_full, '1',['keyY'=>'Ключ Y', 'keyX1'=>'Ключ X1', 'keyX2'=>'Ключ X2'], [['coef'=>1,'keyX2'=>1010], ['coef'=>1,'keyX2'=>1021]]);
 
 echo '<input type="button" value="show" id="show_btn"/>';
 
-$dial_1 = new dialog('test_id');
+$dial_1 = new dialog('test_dialog_id');
 $dial_1->set_dialog_style('background-color:orange;min-width:440px;');
-//$dial_1->set_source('<div style="padding:3px;background-color:yellow;">fdgsdfgsdfg</div>');
-//$dial_1->set_dialog();
-
-//$dial_1->on_show_hide('show_btn');
-
 $dial_1->set_template('input_regression_data');
-
 $dial_1->on_show_hide('show_btn');
 
+//echo '<div style="width:300px;height:300px;"></div>';
+
+$graph_1 = new graph_canvas('test_graph_id');
+$graph_1->set_dynamic_data('#test_dialog_id', 'test_dialog_id_rec_dialog_complete');
+$graph_1->set_graph();
 
 ?>

@@ -23,7 +23,7 @@ if(!isset($_REQUEST['page']) && isset($_GET['page'])){$_REQUEST['page'] = $_GET[
 if(!isset($_REQUEST['nid']) && isset($_GET['nid'])){$_REQUEST['nid'] = $_GET['nid'];}
 // ДЛЯ КРАСИВОГО URL
 
-if($_REQUEST['page']==''){$_REQUEST['page'] = 1;}
+if(!isset($_REQUEST['page']) || $_REQUEST['page']===''){$_REQUEST['page'] = 1;}
 
 if(isset($_REQUEST['nid'])){
     $file_content = News::get_source_cache('http://api.innogest.ru/api/v33/news/node?nid='.$_REQUEST['nid'], 'news_nid_'.$_REQUEST['nid'], 60);

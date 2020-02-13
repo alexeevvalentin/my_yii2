@@ -12,10 +12,10 @@ use yii\helpers\Url;
 
 
 
-$file_json = GenF::get_file_source(Yii::$app->basePath.'\views\taglist\kladr_json.txt');
+$file_json = GenF::get_file_source(Yii::$app->basePath.'/views/taglist/kladr_json.txt');
 $f_j_arr = Json::decode($file_json);
 
-$file_json_full = GenF::get_file_source(Yii::$app->basePath.'\views\taglist\kladrfull.txt');
+$file_json_full = GenF::get_file_source(Yii::$app->basePath.'/views/taglist/kladrfull.txt');
 $f_j_arr_full = $file_json_full;
 //$f_j_arr_full = Json::decode($file_json_full);
 

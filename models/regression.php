@@ -42,6 +42,7 @@ class regression extends Model
             foreach($val_str as $in_col=>$val_col){
                 $cur_avg = matrix::arr_avg($Z, $in_col);
                 $X_matrix[$in_str][$in_col] = 1*$Z[$in_str][$in_col] - 1*$cur_avg;
+                if(!isset($X_detect_monodata[$in_col])){$X_detect_monodata[$in_col] = 0;}
                 $X_detect_monodata[$in_col] = 1*$X_detect_monodata[$in_col] + abs(1*$X_matrix[$in_str][$in_col]);
             }
         }
@@ -137,7 +138,7 @@ class regression extends Model
         foreach($R as $ri => $vi){
             $R_added[$ri][array_keys($Y[array_keys($Y)[0]])[0]] = 0;
             foreach($vi as $rj => $vj){
-                if(!$R_added[array_keys($Y[array_keys($Y)[0]])[0]][$rj]){
+                if(!isset($R_added[array_keys($Y[array_keys($Y)[0]])[0]][$rj])){
                     $R_added[array_keys($Y[array_keys($Y)[0]])[0]][$rj] = 0;
                 }
                 $R_added[$ri][$rj] = 0;
@@ -169,6 +170,7 @@ class regression extends Model
         foreach($Z as $k_1=>$v_1){
             foreach($v_1 as $k_2=>$v_2){
                 if(isset($Z[1*$k_1 - 1][$k_2])){
+                    if(!isset($z_map_key[$k_2])){$z_map_key[$k_2] = 0;}
                     $z_map_key[$k_2] = $z_map_key[$k_2] + abs(1*$Z[1*$k_1 - 1][$k_2] - 1*$Z[1*$k_1][$k_2]);
                 }
             }
@@ -264,7 +266,7 @@ class regression extends Model
         $tn_max = 0;
         $EnEc_nons_cur = 0;
         foreach ($regr_res['Yi_Ys'] as $k=>$v){
-            if($regr_res['Yi_Ys'][1*$k+1]){
+            if(isset($regr_res['Yi_Ys'][1*$k+1])){
                 $EnEc_nons_cur = 1*$regr_res['Yi_Ys'][1*$k+1][0] - 1*$regr_res['Yi_Ys'][1*$k][0];
                 if($EnEc_nons_cur >= 0){
                     $vn = $vn + 1;
@@ -351,7 +353,7 @@ class regression extends Model
         $sumei = 0;
         foreach($regr_res['Yi_Ys'] as $k=>$v){
             $sumei = $sumei + $v[0]*$v[0];
-            if($regr_res['Yi_Ys'][1*$k - 1]){
+            if(isset($regr_res['Yi_Ys'][1*$k - 1])){
                 $sumeiei1 = $sumeiei1 + ($v[0] - $regr_res['Yi_Ys'][1*$k - 1][0])*($v[0] - $regr_res['Yi_Ys'][1*$k - 1][0]);
             }
         }
@@ -460,6 +462,7 @@ class regression extends Model
             $Y_forecast = [];
             foreach ($Z_forecast as $k_1 => $v_1) {
                 foreach ($v_1 as $k_2 => $v_2) {
+                    if(!isset($Y_forecast[$k_1]['forecast'])){$Y_forecast[$k_1]['forecast'] = 0;}
                     $Y_forecast[$k_1]['forecast'] = 1 * $Y_forecast[$k_1]['forecast'] + $regr_res['ZTZ_1ZTY'][$k_2][array_keys($regr_res['ZTZ_1ZTY'][$k_2])[0]] * $Z_forecast[$k_1][$k_2];
                 }
             }

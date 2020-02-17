@@ -47,7 +47,7 @@ $X2_fall = [['coef'=>445.4,'keyX2'=>445.4],['coef'=>486,'keyX2'=>486.6],['coef'=
 
 regression::report_regression($Y_key_full, $X2_key_full, '1',['keyY'=>'Ключ Y', 'keyX1'=>'Ключ X1', 'keyX2'=>'Ключ X2'], [['coef'=>1,'keyX2'=>1010], ['coef'=>1,'keyX2'=>1021]]);
 
-echo '<input type="button" value="show" id="show_btn"/>';
+echo '<input type="button" style="margin:8px;" value="Задать данные для графика" id="show_btn"/>';
 
 $dial_1 = new dialog('test_dialog_id');
 $dial_1->set_dialog_style('background-color:orange;min-width:440px;');

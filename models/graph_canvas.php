@@ -34,21 +34,6 @@ class graph_canvas extends Model
         $this->width = $width;
         $this->height = $height;
 
-        /*
-        Yii::$app->view->registerCss(
-            '#'.$id.'{position:absolute;z-index:10001;padding:8px;}'.
-            '#'.$id.'_draggable{cursor:move;position:absolute;height:0px;width:0px;z-index:10000;display:none;}'.
-            '#'.$id.'_controll_btn{display:table;float:right;}'.
-            '#'.$id.'_block_controll{display:table;width:100%;}'.
-            '.'.$id.'_controll_btn_dialog_cell{padding:3px;display:table-cell;}'.
-            '#'.$id.'_controll_btn_full_window{font-size:12px;width:20px;height:20px;padding:0px;cursor:pointer;}'.
-            '#'.$id.'_controll_btn_collapse{font-size:12px;width:20px;height:20px;padding:0px;cursor:pointer;}'.
-            '#'.$id.'_controll_btn_x_close{font-size:12px;width:20px;height:20px;padding:0px;cursor:pointer;}'.
-            '#'.$id.'_source_area{display:table;}'
-
-        );
-        */
-
         Yii::$app->view->registerCss(
             '#'.$this->base_id.'{border:1px solid grey;width:'.$this->width.';height:'.$this->height.';}'.
             '#'.$this->base_id.'_top_part_canvas{width:100%;}'.
@@ -58,7 +43,8 @@ class graph_canvas extends Model
             '#'.$this->base_id.'_base_source_canvas{}'.
             '#'.$this->base_id.'_div_outher{position:relative;}'.
             '#'.$this->base_id.'_div{width:'.$this->width.';height:'.$this->height.';}'.
-            '#'.$this->base_id.'_settings{overflow:hidden;height:26px;display:table;}'.
+            '#'.$this->base_id.'_settings_button_collapse{position:relative;top:-10px;left:-10px;background-color:#D8D8D8;border-radius:8px;height:30px;width:160px;display:block;padding:5px;font-weight:bold;cursor:pointer;}'.
+            '#'.$this->base_id.'_settings{overflow:auto;height:150px;width:350px;display:none;background-color:#D8D8D8;margin:8px;border-radius:8px;padding:3px;position:relative;left:150px;top:-18px;}'.
             '#'.$this->base_id.'_settings > div{display:table-cell;}'.
             '.'.$this->base_id.'_table_div{display:block;}'.
             '.'.$this->base_id.'_table_div > div{display:table-cell;}'
@@ -73,14 +59,20 @@ class graph_canvas extends Model
                 </div>
                 <div id="'.$this->base_id.'_scale_x_value"></div>
             </div>
-            <div id="'.$this->base_id.'_settings">
-                <div id="'.$this->base_id.'_settings_detect_x_y"></div>
-                <div id="'.$this->base_id.'_settings_detect_x_y_datajson"></div>
+            <div style="height:0px;width:0px;">
+                <div id="'.$this->base_id.'_settings_button_collapse">&#8616; настройки графика</div>
+            </div>
+            <div style="height:0px;width:0px;">
+                <div id="'.$this->base_id.'_settings">
+                    <div id="'.$this->base_id.'_settings_detect_x_y"></div>
+                    <div id="'.$this->base_id.'_settings_set_color"></div>
+                </div>
             </div>
         </div>';
 
         $jsCode =<<<JS
         
+        var json_data_$this->base_id;
 
         var canvas_w_$this->base_id = "$this->width";
         var canvas_h_$this->base_id = "$this->height";
@@ -250,20 +242,47 @@ class graph_canvas extends Model
                 $("#$this->base_id"+"_settings_detect_x_y").html('<div style="display:table;">' +
                  '<div style="display:table-cell;width:30px;text-align:center;">X</div>' +
                   '<div style="display:table-cell;width:30px;text-align:center;">Y</div>' +
+                  '<div style="display:table-cell;width:120px;text-align:center;">COLOR LINE</div>' +
+                  '<div style="display:table-cell;width:30px;text-align:center;"></div>' +
+                  '<div style="display:table-cell;width:30px;text-align:center;">NAME</div>' +
+                  
                    '');
 
                 for (var key in json_data['head']){
                     $("#$this->base_id"+"_settings_detect_x_y").append('<div style="display:table;">' +
-                     '<div style="display:table-cell;width:30px;text-align:center;"><input type="checkbox" this_value="'+key+'" id="'+key+'_x_'+'$this->base_id'+'" name="'+json_data['head'][key]+'" class="'+'$this->base_id'+'_paramscale_map_graph_x"/></div>' +
-                      '<div style="display:table-cell;width:30px;text-align:center;"><input type="checkbox" this_value="'+key+'" id="'+key+'_y_'+'$this->base_id'+'" name="'+json_data['head'][key]+'" class="'+'$this->base_id'+'_paramscale_map_graph_y"/></div>' +
-                       '<div style="display:table-cell;text-align:left;">' + json_data['head'][key] + '</div>');
+                     '<div style="display:table-cell;width:30px;height:45px;text-align:center;"><input type="checkbox" this_value="'+key+'" id="'+key+'_x_'+'$this->base_id'+'" name="'+json_data['head'][key]+'" class="'+'$this->base_id'+'_paramscale_map_graph_x"/></div>' +
+                      '<div style="display:table-cell;width:30px;height:45px;text-align:center;"><input type="checkbox" this_value="'+key+'" id="'+key+'_y_'+'$this->base_id'+'" name="'+json_data['head'][key]+'" class="'+'$this->base_id'+'_paramscale_map_graph_y"/></div>' +
+                      '<div id="'+"$this->base_id"+'_'+key+'_color_code" style="display:table-cell;margin:3px;height:45px;background-color:rgb(' + json_data['color'][key] + ');width:20px;height:8px;"></div>'+
+                      '<div style="display:table-cell;text-align:left;height:45px;padding:3px;"><input style="width:110px;" class="'+"$this->base_id"+'_changer_color" key="'+key+'" value="rgb(' + json_data['color'][key] + ')" /></div>'+
+                      '<div style="display:table-cell;text-align:left;height:45px;"><div style="display:block;width:110px;overflow:auto;">' + json_data['head'][key] + '</div></div>'
+
+                       );
                 }
             }
         
         };
         
+        $(document).on("click", "#$this->base_id"+"_settings_button_collapse", function(){
+            
+            if($("#$this->base_id"+"_settings").css('display') === 'none'){
+                if($("#$this->base_id"+"_settings_detect_x_y").html() !== ''){
+                    $("#$this->base_id"+"_settings").css('height', 0);
+                    $("#$this->base_id"+"_settings").css('display', 'block');
+                    $("#$this->base_id"+"_settings").animate({height: 150}, 300,function(){
+                    });
+                }
+            }else{
+                $("#$this->base_id"+"_settings").animate({height: 0}, 300,function(){
+                    $("#$this->base_id"+"_settings").css('display', 'none');
+                });
+            }
+            
+        });
+        
         $(document).on("click", ".$this->base_id"+"_paramscale_map_graph_x", function(){
+
         	var this_value = $(this).attr('this_value');
+
             checked_x_graph_$this->base_id = {};
             if($(this).prop('checked') === true){
                 checked_x_graph_$this->base_id[this_value] = $(this).attr('name');
@@ -282,11 +301,14 @@ class graph_canvas extends Model
                 }
             });
             
-            $("#$this->base_id").trigger('change_spacification_graph_'+'$this->base_id', [{"x": checked_x_graph_$this->base_id, "y": checked_y_graph_$this->base_id}]);
+            $("#$this->base_id").trigger('change_specification_graph_'+'$this->base_id', [json_data_$this->base_id]);
+            
         });
 
         $(document).on("click", ".$this->base_id"+"_paramscale_map_graph_y", function(){
+
             var this_value = $(this).attr('this_value');
+            
             if($(this).prop('checked') === true){
                 checked_y_graph_$this->base_id[this_value] = $(this).attr('name');
             }else{
@@ -299,10 +321,33 @@ class graph_canvas extends Model
                 }
             });
 
-            $("#$this->base_id").trigger('change_spacification_graph_'+'$this->base_id', [{"x": checked_x_graph_$this->base_id, "y": checked_y_graph_$this->base_id}]);
+            $("#$this->base_id").trigger('change_specification_graph_'+'$this->base_id', [json_data_$this->base_id]);
+            
         });
         
-        var pre_draw_$this->base_id = function (json_data){
+        $("#$this->base_id").on('change_specification_graph_'+'$this->base_id', function( event, jsondat) {
+
+            draw_graph_$this->base_id(jsondat, 'scale_specification');
+            
+        });
+
+        $(document).on("change", ".$this->base_id"+"_changer_color", function(){
+            var in_key = $(this).attr('key');
+            var cur_value = $(this).val();
+            //изменение цвета внутри настроек
+            $("#$this->base_id"+'_'+in_key+"_color_code").css('background-color', $(this).val());
+            //изменение цвета внутри легенды
+            $("#$this->base_id"+"_"+in_key+"_legend_color_code").css('background-color', $(this).val());
+            //изменение цвета внутри json данных
+            var color_value = cur_value.substring(4);
+            color_value = color_value.substring(0, color_value.length - 1);
+            json_data_$this->base_id['color'][in_key] = color_value;
+            //перерисовка самого графика
+            draw_graph_$this->base_id(json_data_$this->base_id, 'scale_specification');
+            
+        });
+        
+        var pre_draw_$this->base_id = function (json_data, spec=''){
     
             if(Object.keys(json_data['head']).length < 2){
                 alert('Кол-во наблюдаемых объектов должно быть более одного');
@@ -318,12 +363,11 @@ class graph_canvas extends Model
             canvas_y_$this->base_id = $("#$this->base_id").position().top + $("#$this->base_id").height();
 		    canvas_x_$this->base_id = $("#$this->base_id").position().left;
 
-		    draw_select_paramscale_map_graph_$this->base_id(json_data);
-		    
-		    //------------ to do если перерисовка не запущена от нажатия "chekbox"
-		    checked_x_graph_$this->base_id = {};
-		    checked_y_graph_$this->base_id = {};
-		    //------------ to do если перерисовка не запущена от нажатия "chekbox"
+		    if(spec !== 'scale_specification'){
+		        checked_x_graph_$this->base_id = {};
+                checked_y_graph_$this->base_id = {};
+		        draw_select_paramscale_map_graph_$this->base_id(json_data);
+		    }
 		    
             if(Object.keys(checked_x_graph_$this->base_id).length === 0 && checked_x_graph_$this->base_id.constructor === Object && Object.keys(checked_y_graph_$this->base_id).length === 0 && checked_y_graph_$this->base_id.constructor === Object){
                 var h = 0;
@@ -376,14 +420,54 @@ class graph_canvas extends Model
 
             for(var key in json_data['head']){
                 if(checked_y[key]){
-                    
-                    $("#$this->base_id"+"_id_area_legend").append('<div style="display:block;padding:3px;" class="' + "$this->base_id" + '_class_legend '+"$this->base_id"+'_class_graph_element"><div style="display:table-cell;"><div style="display:block;padding:3px;width:30px;background-color:rgb('+json_data['color'][key]+')"></div></div><div style="display:table-cell;text-align:left;padding:3px;">'+json_data['head'][key]+'</div></div>');
+                    $("#$this->base_id"+"_id_area_legend").append('<div style="display:block;padding:3px;" class="' + "$this->base_id" + '_class_legend '+"$this->base_id"+'_class_graph_element"><div style="display:table-cell;"><div id="'+"$this->base_id"+'_'+key+'_legend_color_code" style="display:block;padding:3px;width:30px;background-color:rgb('+json_data['color'][key]+')"></div></div><div style="display:table-cell;text-align:left;padding:3px;">'+json_data['head'][key]+'</div></div>');
                 }
             }
-            
-            //selector_place_legend.append('<div style="display:block;" class="' + "$this->base_id" + '_class_legend '+"$this->base_id"+'_class_graph_element"></div>');
-            
+
         };
+        
+        var draw_point__$this->base_id = function(x, y, xReal, yReal, rgb, selector){
+            var dop_style = 'position:absolute;border-radius:6px;width:6px;height:6px;cursor:pointer;border:1px solid #2C2C2C; background-color: '+rgb+';';
+            selector.parent().append('<div class="'+"$this->base_id"+'_point_graph '+"$this->base_id"+'_class_graph_element" os_x="'+xReal+'" os_y="'+yReal+'" rgb_color="'+rgb+'" style="z-index:'+selector.css('zIndex')+';top:'+(y + selector.position().top - 3)+'px;left:'+(x + selector.position().left - 3)+'px;'+dop_style+'"></div>');
+        };
+        
+        $(document).on("click", ".$this->base_id" + "_point_graph", function(){
+            if($(this).html() === '' && $(this).width() >= 4 && $(this).width() <= 8){
+                $(this).css('z-index','3');
+                $(this).css('overflow','auto');
+                $(this).animate({
+                    width: "+=80",
+                    height: "+=50"
+                }, 500, function() {
+                    $(this).html('<div style="background-color:white;font-size:12px;height:80%;width:80%;top:8%;left:8%;position:relative;border-radius:3px;">Y:&#160;<span style="font-weight:bold;">'+ (1*$(this).attr('os_y')).toFixed(2) +'</span><br/>X:&#160;<span style="font-weight:bold;">'+ (1*$(this).attr('os_x')).toFixed(2) +'</span></div>');
+                });
+            }
+        });
+	    $(document).on("mouseenter", ".$this->base_id" + "_point_graph", function(){
+			$(this).css('box-shadow', '0px 0px 0px 3px #F58E47');
+			if($(this).html() !== ''){
+				$(this).html('');
+				$(this).animate({
+					width: "-=80",
+					height: "-=50"
+				}, 500, function() {
+					$(this).html('');
+					$(this).css('z-index','2');
+				});
+			}
+		});
+	    $(document).on("mouseleave", ".$this->base_id" + "_point_graph", function(){
+			$(this).css('box-shadow', '');			
+			if($(this).html() !== ''){
+				$(this).html('');
+				$(this).animate({
+					width: "-=80",
+					height: "-=50"
+				}, 500, function() {
+					$(this).css('z-index','2');
+				});
+			}
+	    });
         
         var draw_scale__y_$this->base_id = function(json_data, checked_y, val_min, val_max, selector_place_scale_y){
             
@@ -478,7 +562,6 @@ class graph_canvas extends Model
             
 	    };
 
-        
         var draw_scale__x_$this->base_id = function (json_data, val_min, val_max, selector_place_scale_x, label){
             
             if($("#$this->base_id"+"_scale__x").length !== 0){
@@ -521,8 +604,6 @@ class graph_canvas extends Model
             var view_i = '';
             var corcoef_length_val = 0;
             
-            //console.log(cur_interval);
-                        
             for (var i = val_min; i < val_max + cur_interval; i = i + cur_interval){
                 
                 cur_i = x_coord_$this->base_id(i, val_min, val_max, scale_x_width_true);
@@ -589,13 +670,18 @@ class graph_canvas extends Model
 	    };
 
         
-        var clear_graph_$this->base_id = function(ctx){
+        var clear_graph_$this->base_id = function(ctx, spec=''){
             ctx.clearRect(0, 0, $("#$this->base_id").innerWidth()+21, $("#$this->base_id").innerHeight()+21);
-            $("#$this->base_id"+"_settings_detect_x_y").html('');
-            //$('.'+prefix_parent_id+'new_graph').remove();
+            if(spec !== 'scale_specification'){
+                $("#$this->base_id"+"_settings_detect_x_y").html('');
+            }
+            
+            $(".$this->base_id"+"_class_graph_element").remove();
         };
         
-        var draw_graph_$this->base_id = function (json_data){
+        var draw_graph_$this->base_id = function (json_data, spec=''){
+
+            json_data_$this->base_id = json_data;
             
             if(typeof json_data === 'string'){
                 json_data = JSON.parse(json_data);
@@ -607,12 +693,9 @@ class graph_canvas extends Model
 
             var cur_canvas_$this->base_id = $("#$this->base_id")[0];
             var canvas_draw_$this->base_id = cur_canvas_$this->base_id.getContext("2d");
-            clear_graph_$this->base_id(($("#$this->base_id")[0]).getContext("2d"));
+            clear_graph_$this->base_id(($("#$this->base_id")[0]).getContext("2d"), spec);
 
-            var prescreen = pre_draw_$this->base_id(json_data);
-            
-            //console.log(Object.keys(arr_max_x_$this->base_id));
-            //console.log(json_data['head'][Object.keys(arr_max_x_$this->base_id)[0]]);
+            var prescreen = pre_draw_$this->base_id(json_data, spec);
             
             var sortable = [];
             for (var vehicle in json_data['data']) {sortable.push([vehicle, json_data['data'][vehicle]]);}
@@ -681,7 +764,7 @@ class graph_canvas extends Model
                             
                             canvas_draw_$this->base_id.lineTo(cur_x, cur_y);
                             canvas_draw_$this->base_id.lineWidth = 1;
-                        
+                            draw_point__$this->base_id(cur_x, cur_y, 1*sortable[key2][1], 1*json_data['data'][key1+'_'+sort_index], 'rgb('+json_data['color'][key1]+')', $("#$this->base_id"));
                         }
                     }
                     col_line = col_line + 1;  

@@ -351,7 +351,9 @@ $("#$this->base_id"+"_rec_dialog_datasource").click(function(){
                 cur_string = ''+$(elj).find('input').val();
                 json_arr['head'][transliterate(cur_string)] = cur_string;
                 cur_md5 = md5("color"+cur_string);
-                json_arr['color'][transliterate(cur_string)] = parseInt(cur_md5.substr(0,2), 16)+','+parseInt(cur_md5.substr(2,2), 16)+','+parseInt(cur_md5.substr(4,2), 16);
+                if(!json_arr['color'][transliterate(cur_string)]){
+                    json_arr['color'][transliterate(cur_string)] = parseInt(cur_md5.substr(0,2), 16)+','+parseInt(cur_md5.substr(2,2), 16)+','+parseInt(cur_md5.substr(4,2), 16);
+                }
             }else{
                 fl_data = 1;
                 cur_string = ''+$(elj).find('input').val();

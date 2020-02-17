@@ -6,7 +6,7 @@ use yii\helpers\Json;
 
 $db_name = DBM::getDsnAttribute('dbname', Yii::$app->db->dsn);
 
-if($db_name === 'minweb'){
+if($db_name === 'u162841869_pryii2'){
     if($action === 'update') {
         $pdata = Yii::$app->request->post();
 

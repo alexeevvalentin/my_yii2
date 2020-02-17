@@ -22,7 +22,7 @@ use app\models\GenF;
 
     $db_name = DBM::getDsnAttribute('dbname', Yii::$app->db->dsn);
 
-    $files = \yii\helpers\FileHelper::findFiles(Yii::$app->basePath.'\views\dbm');
+    $files = \yii\helpers\FileHelper::findFiles(Yii::$app->basePath.'/views/dbm');
 
     $cur_file_name_for_filter = '_form_'.$model::tableName().'.php';
 

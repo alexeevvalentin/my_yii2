@@ -66,7 +66,8 @@ class tag extends Model
         if(is_string($model)){
             $class_name = $model;
         }else{
-            $class_name = end(explode("\\", get_class($model)));
+            $prom_arr_class = explode("\\", get_class($model));
+            $class_name = end($prom_arr_class);
         }
 
         if($options === ''){
@@ -192,7 +193,9 @@ JS;
 
     public static function input($model, $name, $options='', $set_value=null){
         $this_id = self::tag_symb($name);
-        $class_name = end(explode("\\", get_class($model)));
+
+        $prom_arr_class = explode("\\", get_class($model));
+        $class_name = end($prom_arr_class);
 
         if(is_array($options)){
             $str_options = '';
@@ -232,7 +235,8 @@ JS;
         if(is_string($model)){
             $class_name = $model;
         }else{
-            $class_name = end(explode("\\", get_class($model)));
+            $prom_arr_class = explode("\\", get_class($model));
+            $class_name = end($prom_arr_class);
         }
 
         if(is_array($options)){
@@ -788,7 +792,8 @@ JS;
         if(is_string($model)){
             $class_name = $model;
         }else{
-            $class_name = end(explode("\\", get_class($model)));
+            $prom_arr_class = explode("\\", get_class($model));
+            $class_name = end($prom_arr_class);
         }
 
         if(is_array($options)){

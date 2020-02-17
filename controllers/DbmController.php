@@ -32,6 +32,7 @@ class DbmController extends \yii\web\Controller
     public function actionCreate($table)
     {
         $fl_isset_file = self::file_filter($table);
+
         if($fl_isset_file !== ''){
             $action = 'create';
             return require_once($fl_isset_file);
@@ -57,8 +58,6 @@ class DbmController extends \yii\web\Controller
     {
 
         $fl_isset_file = self::file_filter($table);
-
-        //$fl_isset_file = '';
 
         if($fl_isset_file !== ''){
             $action = 'update';
@@ -134,7 +133,7 @@ class DbmController extends \yii\web\Controller
     }
 
     private static function file_filter($table){
-        $files = \yii\helpers\FileHelper::findFiles(Yii::$app->basePath.'\views\dbm');
+        $files = \yii\helpers\FileHelper::findFiles(Yii::$app->basePath.'/views/dbm');
         $cur_file_name_for_filter = '_controller_'.$table.'.php';
         $fl_isset_file = '';
         foreach($files as $k=>$v){

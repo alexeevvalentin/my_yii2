@@ -54,8 +54,6 @@ $dial_1->set_dialog_style('background-color:orange;min-width:440px;');
 $dial_1->set_template('input_regression_data');
 $dial_1->on_show_hide('show_btn');
 
-//echo '<div style="width:300px;height:300px;"></div>';
-
 $graph_1 = new graph_canvas('test_graph_id');
 $graph_1->set_dynamic_data('#test_dialog_id', 'test_dialog_id_rec_dialog_complete');
 $graph_1->set_graph();

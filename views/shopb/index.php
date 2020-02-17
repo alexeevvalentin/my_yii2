@@ -7,8 +7,10 @@ Yii::$app->name = 'Книги';
 use app\models\tag;
 use yii\helpers\Html;
 use app\models\DBM;
+use app\models\Books;
 use yii\helpers\Json;
 use yii\helpers\Url;
+
 
 ?>
 <h1>Киоск-стенд</h1>

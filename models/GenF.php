@@ -26,6 +26,11 @@ class GenF extends Model
         */
     }
 
+    public static function is_json_string($string) {
+        json_decode($string);
+        return (json_last_error() == JSON_ERROR_NONE);
+    }
+
     public static function index_of($source, $search){
         if(strpos($source, $search)===false){
             return -1;

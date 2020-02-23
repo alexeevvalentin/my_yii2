@@ -30,7 +30,6 @@ class Ajax extends Model
         */
     }
 
-
     public static function field($type_field, $this_name, $this_id, $url, $id_result='', $script_result='', $style='', $data_arr=[], $type_ajax='POST'){
 
         if($style === ''){
@@ -81,9 +80,6 @@ class Ajax extends Model
             Yii::$app->view->registerJs('
                 var id_result = "'.$id_result.'";
                 var script_result = "'.$script_result.'";
-                
-                
-                
                 $("#'.$this_id.'").change(function () {
                     var this_value = $(this).val();
                     $.ajax({
@@ -91,9 +87,6 @@ class Ajax extends Model
                         url: "'.Url::to([$url]).'",
                         data: {_csrf: "'.Yii::$app->request->getCsrfToken().'", data_json: '. json_encode($data_arr) .', input_val: $(this).val()},
                         success: function(data){
-                        
-                            
-                        
                             if(id_result !== ""){
                                 $("#"+id_result).html(data);
                                 return true;

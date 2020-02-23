@@ -35,14 +35,14 @@ class graph_canvas extends Model
         $this->height = $height;
 
         Yii::$app->view->registerCss(
-            '#'.$this->base_id.'{border:1px solid grey;width:'.$this->width.';height:'.$this->height.';}'.
+            '#'.$this->base_id.'{border:1px solid grey;width:'.$this->width.';height:'.$this->height.';position:relative;}'.
             '#'.$this->base_id.'_top_part_canvas{width:100%;}'.
-            '#'.$this->base_id.'_scale_x_value{width:100%;vertical-align:top;text-align:center;height:80px;}'.
+            '#'.$this->base_id.'_scale_x_value{width:100%;vertical-align:top;height:80px;}'.
             '#'.$this->base_id.'_scale_y_value{vertical-align:middle;text-align:right;width:80px;}'.
             '#'.$this->base_id.'_legend_for_y{vertical-align:middle;text-align:left;width:250px;}'.
             '#'.$this->base_id.'_base_source_canvas{}'.
             '#'.$this->base_id.'_div_outher{position:relative;}'.
-            '#'.$this->base_id.'_div{width:'.$this->width.';height:'.$this->height.';}'.
+            '#'.$this->base_id.'_div{width:'.$this->width.';height:'.$this->height.';position:relative;}'.
             '#'.$this->base_id.'_settings_button_collapse{position:relative;top:-10px;left:-10px;background-color:#D8D8D8;border-radius:8px;height:30px;width:160px;display:block;padding:5px;font-weight:bold;cursor:pointer;}'.
             '#'.$this->base_id.'_settings{overflow:auto;height:150px;width:350px;display:none;background-color:#D8D8D8;margin:8px;border-radius:8px;padding:3px;position:relative;left:150px;top:-18px;}'.
             '#'.$this->base_id.'_settings > div{display:table-cell;}'.
@@ -246,7 +246,7 @@ class graph_canvas extends Model
                   '<div style="display:table-cell;width:30px;text-align:center;"></div>' +
                   '<div style="display:table-cell;width:30px;text-align:center;">NAME</div>' +
                   
-                   '');
+                   '</div>');
 
                 for (var key in json_data['head']){
                     $("#$this->base_id"+"_settings_detect_x_y").append('<div style="display:table;">' +
@@ -254,7 +254,7 @@ class graph_canvas extends Model
                       '<div style="display:table-cell;width:30px;height:45px;text-align:center;"><input type="checkbox" this_value="'+key+'" id="'+key+'_y_'+'$this->base_id'+'" name="'+json_data['head'][key]+'" class="'+'$this->base_id'+'_paramscale_map_graph_y"/></div>' +
                       '<div id="'+"$this->base_id"+'_'+key+'_color_code" style="display:table-cell;margin:3px;height:45px;background-color:rgb(' + json_data['color'][key] + ');width:20px;height:8px;"></div>'+
                       '<div style="display:table-cell;text-align:left;height:45px;padding:3px;"><input style="width:110px;" class="'+"$this->base_id"+'_changer_color" key="'+key+'" value="rgb(' + json_data['color'][key] + ')" /></div>'+
-                      '<div style="display:table-cell;text-align:left;height:45px;"><div style="display:block;width:110px;overflow:auto;">' + json_data['head'][key] + '</div></div>'
+                      '<div style="display:table-cell;text-align:left;height:45px;"><div style="display:block;width:110px;overflow:auto;">' + json_data['head'][key] + '</div></div></div>'
 
                        );
                 }
@@ -347,8 +347,10 @@ class graph_canvas extends Model
             
         });
         
-        var pre_draw_$this->base_id = function (json_data, spec=''){
+        var pre_draw_$this->base_id = function (json_data, spec){
     
+            spec = spec || '';
+            
             if(Object.keys(json_data['head']).length < 2){
                 alert('Кол-во наблюдаемых объектов должно быть более одного');
 			    return false;
@@ -480,7 +482,7 @@ class graph_canvas extends Model
             //ширина канвы шкалы X расчетная, для расчета координат делений
             var scale_y_height_true = 1*$("#$this->base_id").innerHeight() + 2;
             
-            selector_place_scale_y.append('<canvas id="'+"$this->base_id"+'_scale__y" class="'+"$this->base_id"+'_class_graph_element" width="' + scale_y_width + '" height="' + scale_y_height_true + 'px" style="position:absolute;width:' + scale_y_width + ';height:'+scale_y_height_true+'px;top:' + $("#$this->base_id").position().top + 'px;left:' + (1*$("#$this->base_id").position().left - 1*scale_y_width_value) + 'px;"></canvas>');
+            selector_place_scale_y.append('<canvas id="'+"$this->base_id"+'_scale__y" class="'+"$this->base_id"+'_class_graph_element" width="' + scale_y_width + '" height="' + scale_y_height_true + 'px" style="position:relative;width:' + scale_y_width + ';height:'+scale_y_height_true+'px;top:-5px;left:0px;"></canvas>');
             
             var cur_scale_y_$this->base_id = $("#$this->base_id"+"_scale__y")[0];
             var canvas_scale_y_$this->base_id = cur_scale_y_$this->base_id.getContext("2d");
@@ -573,7 +575,7 @@ class graph_canvas extends Model
             //ширина канвы шкалы X расчетная, для расчета координат делений 
             var scale_x_width_true = 1*$("#$this->base_id").innerWidth() + 2;
             
-    		selector_place_scale_x.append('<canvas id="'+"$this->base_id"+'_scale__x" class="'+"$this->base_id"+'_class_graph_element" width="' + scale_x_width_true + 'px" height="' + scale_x_height + '" style="position:absolute;width:' + scale_x_width_true + 'px;height:'+scale_x_height+';top:' + (1*$("#$this->base_id").position().top + 1*$("#$this->base_id").innerHeight()+1) + 'px;left:' + (1*$("#$this->base_id").position().left) + 'px;"></canvas>');
+    		selector_place_scale_x.append('<canvas id="'+"$this->base_id"+'_scale__x" class="'+"$this->base_id"+'_class_graph_element" width="' + scale_x_width_true + 'px" height="' + scale_x_height + '" style="position:relative;width:' + scale_x_width_true + 'px;height:'+scale_x_height+';top:-18px;left:80px;"></canvas>');
             
 		    var cur_scale_x_$this->base_id = $("#$this->base_id"+"_scale__x")[0];
             var canvas_scale_x_$this->base_id = cur_scale_x_$this->base_id.getContext("2d");
@@ -670,7 +672,8 @@ class graph_canvas extends Model
 	    };
 
         
-        var clear_graph_$this->base_id = function(ctx, spec=''){
+        var clear_graph_$this->base_id = function(ctx, spec){
+            spec = spec || '';
             ctx.clearRect(0, 0, $("#$this->base_id").innerWidth()+21, $("#$this->base_id").innerHeight()+21);
             if(spec !== 'scale_specification'){
                 $("#$this->base_id"+"_settings_detect_x_y").html('');
@@ -679,8 +682,8 @@ class graph_canvas extends Model
             $(".$this->base_id"+"_class_graph_element").remove();
         };
         
-        var draw_graph_$this->base_id = function (json_data, spec=''){
-
+        var draw_graph_$this->base_id = function (json_data, spec){
+            spec = spec || '';
             json_data_$this->base_id = json_data;
             
             if(typeof json_data === 'string'){

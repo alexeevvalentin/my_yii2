@@ -26,7 +26,7 @@ Yii::$app->view->registerCss(
     ".name_analisys{font-weight:bold;padding-bottom:8px;}".
     ".uravn_regression_color{color:#FF9A18;}".
     ".description_coef_reg{color:#3A78D7;padding-top:3px;}".
-    ".hr{width:100%;border-top:1px solid grey;margin-top:3px;margin-bottom:3px;}".
+    ".hr{width:100%;border-top:1px dotted #D8D8D8;margin-top:3px;margin-bottom:3px;}".
     ".span_bold{font-weight:bold;}"
 );
 
@@ -165,6 +165,7 @@ class regression extends Model
     public static function calculate_regression_analisys($Y, $Z, $Z_forecast='', $Head_name=''){
         $resum_result = [];
         $regr_res = self::calculate_regression($Y, $Z);
+        if($regr_res === false){return '<div style="background-color:white;color:#FF5C5C;padding:8px;margin:5px;">Ошибка: недостаточное кол-во наблюдений</div>';}
         $resum_result['Coef_regr'] = $regr_res['ZTZ_1ZTY'];
         $z_map_key = [];
         foreach($Z as $k_1=>$v_1){
@@ -175,6 +176,7 @@ class regression extends Model
                 }
             }
         }
+
         $resum_result['Z_map_key'] = $z_map_key;
         $Yavg = matrix::arr_avg($Y, array_keys($Y[array_keys($Y)[0]])[0]);
         $Zavg = [];
@@ -182,7 +184,7 @@ class regression extends Model
 
         if($Head_name !== ''){
             foreach($z_map_key as $k_1=>$v_1){
-                if(isset($Head_name[$k_1])){
+                if(isset($Head_name[$k_1]) && $Head_name[$k_1] !== 'Свободный коэффициент'){
                     $Zavg[$k_1] = matrix::arr_avg($Z, $k_1);
                     $coef_elast[$k_1] = $regr_res['ZTZ_1ZTY'][$k_1][array_keys($regr_res['ZTZ_1ZTY'][$k_1])[0]]*$Zavg[$k_1]/$Yavg;
                 }
@@ -212,7 +214,7 @@ class regression extends Model
         if($Head_name !== ''){
             foreach($z_map_key as $k_1=>$v_1){
                 $mAll = $mAll + 1;
-                if(isset($Head_name[$k_1])){
+                if(isset($Head_name[$k_1]) && $Head_name[$k_1] !== 'Свободный коэффициент'){
                     $mCoef = $mCoef + 1;
                 }
             }
@@ -225,7 +227,10 @@ class regression extends Model
             }
         }
 
-        $v2 = count($Y) - $mAll;
+        $v2 = count($Y) - 1*$mAll;
+        if(1*$v2 < 1){
+            return '<div style="background-color:white;color:#FF5C5C;padding:8px;margin:5px;">Ошибка: кол-во наблюдений совпадает с количеством коэффициентов регрессии</div>';
+        }
         $nGen = count($Y);
 
         $resum_result['nGen'] = $nGen;
@@ -234,6 +239,10 @@ class regression extends Model
 
         $F_part_1 = $Qm/$mCoef;
         $F_part_2 = $Qos/$v2;
+
+        if(1*$F_part_2 == 0){
+            return '<div style="background-color:white;color:#FF5C5C;padding:8px;margin:5px;">Ошибка: невозможно расчитать остаточную вариацию</div>';
+        }
         $F_cur_criteria = $F_part_1/$F_part_2;
         $F_tbl = self::F_Fisher($mCoef, $v2, 0.05);
 
@@ -310,7 +319,7 @@ class regression extends Model
             $Z_ISORT = [];
             $rank_arr = [];
 
-            if((1*$z_map_key[$ths_key] !== 0 && $Head_name === '') || ($Head_name !== '' && isset($Head_name[$ths_key]))){
+            if((1*$z_map_key[$ths_key] !== 0 && $Head_name === '') || ($Head_name !== '' && isset($Head_name[$ths_key]) && $Head_name[$ths_key] !== 'Свободный коэффициент')){
 
                 foreach($Z as $ths_key2 => $ths_val2){
                     array_push($Z_ISORT, $Z[$ths_key2][$ths_key]);
@@ -338,6 +347,7 @@ class regression extends Model
                     $cur_rank = $cur_rank + 1;
                 }
                 $k_Spearmen = 1 - 6*$d2sum_cur/($nGen*($nGen*$nGen - 1));
+                if(1 - $k_Spearmen*$k_Spearmen <= 0){return '<div style="background-color:white;color:#FF5C5C;padding:8px;margin:5px;">Ошибка: значение (1 - Коэф.Спирмена^2) = 0</div>';}
                 $t_kS = abs($k_Spearmen*(sqrt($nGen-2)/(sqrt(1 - $k_Spearmen*$k_Spearmen))));
 
                 $spirmen[$ths_key]['k_Spearmen'] = $k_Spearmen;
@@ -408,54 +418,60 @@ class regression extends Model
 
         // ---------------------------------- оценка прогностических свойств моделей
 
-        $Y_pr = [];
-        $Z_pr = [];
+        if(1*$nGen > 3) {
+            $Y_pr = [];
+            $Z_pr = [];
 
-        foreach($Y as $k_1 => $v_1){
-            if(1*$k_1 < 1*$nGen - 3){
-                foreach($v_1 as $k_2 => $v_2){
-                    $Y_pr[$k_1][$k_2] = $v_2;
+            foreach ($Y as $k_1 => $v_1) {
+                if (1 * $k_1 < 1 * $nGen - 3) {
+                    foreach ($v_1 as $k_2 => $v_2) {
+                        $Y_pr[$k_1][$k_2] = $v_2;
+                    }
                 }
             }
-        }
 
-        foreach($Z as $k_1 => $v_1){
-            if(1*$k_1 < 1*$nGen - 3){
-                foreach($v_1 as $k_2 => $v_2){
-                    $Z_pr[$k_1][$k_2] = $v_2;
+            foreach ($Z as $k_1 => $v_1) {
+                if (1 * $k_1 < 1 * $nGen - 3) {
+                    foreach ($v_1 as $k_2 => $v_2) {
+                        $Z_pr[$k_1][$k_2] = $v_2;
+                    }
                 }
             }
-        }
 
-        $regr_res_3 = self::calculate_regression($Y_pr, $Z_pr);
+            $regr_res_3 = self::calculate_regression($Y_pr, $Z_pr);
+            if($regr_res_3 === false){return '<div style="background-color:white;color:#FF5C5C;padding:8px;margin:5px;">Ошибка: недостаточное количество наблюдений для оценки прогностических свойств модели.</div>';}
 
-        $KT_p1 = 0;
-        $KT_p2 = 0;
-        $KT_p3 = 0;
+            $KT_p1 = 0;
+            $KT_p2 = 0;
+            $KT_p3 = 0;
 
-        for($i = 0; $i < 3; $i++){
-            $Yi_cur_3 = $Y[count($Y_pr) + $i][array_keys($Y[array_keys($Y)[0]])[0]];
-            $Ys_cur_3 = 0;
-            foreach($regr_res_3['ZTZ_1ZTY'] as $k_1=>$v_1){
-                foreach($v_1 as $k_2=>$v_2){
-                    $Zi_cur_3 = $Z[count($Y_pr) + $i][$k_1];
-                    $Ys_cur_3 = $Ys_cur_3 + $v_2*$Zi_cur_3;
+            for ($i = 0; $i < 3; $i++) {
+                $Yi_cur_3 = $Y[count($Y_pr) + $i][array_keys($Y[array_keys($Y)[0]])[0]];
+                $Ys_cur_3 = 0;
+                foreach ($regr_res_3['ZTZ_1ZTY'] as $k_1 => $v_1) {
+                    foreach ($v_1 as $k_2 => $v_2) {
+                        $Zi_cur_3 = $Z[count($Y_pr) + $i][$k_1];
+                        $Ys_cur_3 = $Ys_cur_3 + $v_2 * $Zi_cur_3;
+                    }
                 }
+                $KT_p1 = 1 * $KT_p1 + ($Yi_cur_3 - $Ys_cur_3) * ($Yi_cur_3 - $Ys_cur_3);
+                $KT_p2 = 1 * $KT_p2 + $Yi_cur_3 * $Yi_cur_3;
+                $KT_p3 = 1 * $KT_p3 + $Ys_cur_3 * $Ys_cur_3;
             }
-            $KT_p1 = 1*$KT_p1 + ($Yi_cur_3 - $Ys_cur_3)*($Yi_cur_3 - $Ys_cur_3);
-            $KT_p2 = 1*$KT_p2 + $Yi_cur_3 * $Yi_cur_3;
-            $KT_p3 = 1*$KT_p3 + $Ys_cur_3 * $Ys_cur_3;
+
+
+            $KT1 = sqrt($KT_p1 / $KT_p2);
+            $KT2 = sqrt($KT_p1 / ($KT_p2 + $KT_p3));
+            $UT1 = (sqrt($KT_p1 / 3)) / (sqrt($KT_p2 / 3) + sqrt($KT_p3 / 3));
+
+            $resum_result['progn_har']['KT1'] = $KT1;
+            $resum_result['progn_har']['KT2'] = $KT2;
+            $resum_result['progn_har']['UT1'] = $UT1;
+        }else{
+            $resum_result['progn_har']['KT1'] = 'невозможно определить, т.к. кол-во наблюдений меньше либо равно 3';
+            $resum_result['progn_har']['KT2'] = 'невозможно определить, т.к. кол-во наблюдений меньше либо равно 3';
+            $resum_result['progn_har']['UT1'] = 'невозможно определить, т.к. кол-во наблюдений меньше либо равно 3';
         }
-
-
-        $KT1 = sqrt($KT_p1/$KT_p2);
-        $KT2 = sqrt($KT_p1/($KT_p2 + $KT_p3));
-        $UT1 = (sqrt($KT_p1/3))/( sqrt($KT_p2/3) + sqrt($KT_p3/3) );
-
-        $resum_result['progn_har']['KT1'] = $KT1;
-        $resum_result['progn_har']['KT2'] = $KT2;
-        $resum_result['progn_har']['UT1'] = $UT1;
-
         // ---------------------------------- прогноз
 
         if($Z_forecast !== '') {
@@ -472,6 +488,7 @@ class regression extends Model
             $Z_forecastT = matrix::matrix_t($Z_forecast);
 
             $new_V2 = $v2;
+
             $ZpZTZ_1 = matrix::matrix_multiply_inkey($Z_forecast, $regr_res['ZTZ_1']);
             $new_S = sqrt($regr_res['Yi_Ys_2_sum'] / $new_V2);
             $for_S = matrix::matrix_multiply($ZpZTZ_1, $Z_forecastT);
@@ -502,6 +519,8 @@ class regression extends Model
 
     }
     public static function calculate_regression($Y, $Z){
+
+        if(count($Y) < 3 || count($Z) < 3){return false;}
 
         $result_arr = [];
 
@@ -2815,11 +2834,10 @@ class regression extends Model
 
     }
 
-    public static function print_regression_analisys($data_regression, $Y, $Z, $Head_name){
+    public static function print_regression_analisys($data_regression, $Y, $Z, $Head_name, $Z_forecast){
         $result_str_regression['base'] = '<div class="name_analisys">Регрессионный анализ</div>';
 
         $description_coef_reg = '';
-        $consolid_str = '';
 
         $key_Y = array_keys($Y[array_keys($Y)[0]])[0];
 
@@ -2829,9 +2847,11 @@ class regression extends Model
 
         $h = 0;
 
+        $consolid_str = $Head_name[$key_Y].' = ';
+
         foreach($key_Z as $k1=>$v1){
             $cur_coef = $data_regression['Coef_regr'][$v1][array_keys($data_regression['Coef_regr'][$v1])[0]];
-            if(isset($Head_name[$v1])){
+            if(isset($Head_name[$v1]) && $Head_name[$v1] !== 'Свободный коэффициент'){
                 $description_coef_reg = $description_coef_reg.'<div>Коэффициент при '.$Head_name[$v1].': <span class="span_bold">'.$cur_coef.'</span></div>';
                 $key_Z_clear_val[$v1] = $cur_coef;
             }else{
@@ -2845,13 +2865,13 @@ class regression extends Model
                 }
             }else if($h === 0){
                 if($cur_coef >= 0){
-                    if($v1 !== '' && isset($Head_name[$v1])){
+                    if($v1 !== '' && isset($Head_name[$v1]) && $Head_name[$v1] !== 'Свободный коэффициент'){
                         $consolid_str = $consolid_str.'<span class="span_bold">'.number_format(1*$cur_coef, 2, '.', '').'</span>*'.$Head_name[$v1];
                     }else{
                         $consolid_str = $consolid_str.'<span class="span_bold">'.number_format(1*$cur_coef, 2, '.', '').'</span>';
                     }
                 }else{
-                    if($v1 !== '' && isset($Head_name[$v1])){
+                    if($v1 !== '' && isset($Head_name[$v1]) && $Head_name[$v1] !== 'Свободный коэффициент'){
                         $consolid_str = $consolid_str.'<span class="span_bold"> - '.number_format(-1*$cur_coef, 2, '.', '').'</span>*'.$Head_name[$v1];
                     }else{
                         $consolid_str = $consolid_str.'<span class="span_bold"> - '.number_format(-1*$cur_coef, 2, '.', '').'</span>';
@@ -2886,7 +2906,7 @@ class regression extends Model
 
         $h = 0;
         foreach($data_regression['t_cur_criteria'] as $k1=>$v1){
-            if(isset($Head_name[$k1])){$cur_name_key = $Head_name[$k1];}
+            if(isset($Head_name[$k1]) && $Head_name[$k1] !== 'Свободный коэффициент'){$cur_name_key = $Head_name[$k1];}
             else{$cur_name_key = 'Свободный коэффициент';}
             if(abs($v1) > 1*$data_regression['t_tbl']){
                 $result_str_regression['dispersion_analisys'] = $result_str_regression['dispersion_analisys'].'<div class="name_part">Критерий Стьюдента t'.$h.'('.$cur_name_key.'): <span class="span_value_true">'.number_format(1*$v1, 2).'</span></div><div class="div_comment">при 5%-ном уровне значимости коэффициент регрессии a'.$h.'('.$cur_name_key.') существенно отличен от нуля т.к. |t<sub>'.$h.'('.$cur_name_key.')</sub>| > t<sub>кр.</sub>(0.05; '.$data_regression['v2'].'), т.е. '.number_format(abs(1*$v1), 2).' > '.$data_regression['t_tbl'].'</div>';
@@ -2982,11 +3002,16 @@ class regression extends Model
         }
 
         $result_str_regression['ipsurreg'] = $result_str_regression['ipsurreg'].'<div class="name_part">Оценка прогностических свойств моделей:</div>';
-        $result_str_regression['ipsurreg'] = $result_str_regression['ipsurreg'].'<div class="div_step"><div class="name_part">Коэффициент K<sub>T1</sub> (Тейла): <span class="span_value">'.number_format(1*$data_regression['progn_har']['KT1'],4).'</span></div>';
-        $result_str_regression['ipsurreg'] = $result_str_regression['ipsurreg'].'<div class="name_part">Коэффициент K<sub>T2</sub>: <span class="span_value">'.number_format(1*$data_regression['progn_har']['KT2'],4).'</span></div>';
-        $result_str_regression['ipsurreg'] = $result_str_regression['ipsurreg'].'<div class="name_part">Коэффициент U<sub>T1</sub>: <span class="span_value">'.number_format(1*$data_regression['progn_har']['UT1'],4).'</span></div>';
-        $result_str_regression['ipsurreg'] = $result_str_regression['ipsurreg'].'<div class="div_comment">Если данные коэффициенты достаточно близки к нулю, то это может свидетельствовать об относительном успехе сделанного прогноза.</div></div>';
-
+        if(is_numeric($data_regression['progn_har']['KT1']) && is_numeric($data_regression['progn_har']['KT2']) && is_numeric($data_regression['progn_har']['UT1'])){
+            $result_str_regression['ipsurreg'] = $result_str_regression['ipsurreg'].'<div class="div_step"><div class="name_part">Коэффициент K<sub>T1</sub> (Тейла): <span class="span_value">'.number_format(1*$data_regression['progn_har']['KT1'],4).'</span></div>';
+            $result_str_regression['ipsurreg'] = $result_str_regression['ipsurreg'].'<div class="name_part">Коэффициент K<sub>T2</sub>: <span class="span_value">'.number_format(1*$data_regression['progn_har']['KT2'],4).'</span></div>';
+            $result_str_regression['ipsurreg'] = $result_str_regression['ipsurreg'].'<div class="name_part">Коэффициент U<sub>T1</sub>: <span class="span_value">'.number_format(1*$data_regression['progn_har']['UT1'],4).'</span></div>';
+        }else{
+            $result_str_regression['ipsurreg'] = $result_str_regression['ipsurreg'].'<div class="div_step"><div class="name_part">Коэффициент K<sub>T1</sub> (Тейла): <span class="span_value">'.$data_regression['progn_har']['KT1'].'</span></div>';
+            $result_str_regression['ipsurreg'] = $result_str_regression['ipsurreg'].'<div class="name_part">Коэффициент K<sub>T2</sub>: <span class="span_value">'.$data_regression['progn_har']['KT2'].'</span></div>';
+            $result_str_regression['ipsurreg'] = $result_str_regression['ipsurreg'].'<div class="name_part">Коэффициент U<sub>T1</sub>: <span class="span_value">'.$data_regression['progn_har']['UT1'].'</span></div>';
+        }
+        $result_str_regression['ipsurreg'] = $result_str_regression['ipsurreg'].'<div class="div_comment">Если данные коэффициенты достаточно близки к нулю, то это может свидетельствовать об относительном успехе сделанного прогноза, если же они близки к единице, то это свидетельствует о плохой прогностической пригодности</div></div>';
 
         if(isset($data_regression['Y_forecast'])){
             $result_str_regression['build_forecast'] = '<div class="name_section">Простроение прогноза</div>';
@@ -2999,7 +3024,7 @@ class regression extends Model
                 $result_str_regression['build_forecast'] = $result_str_regression['build_forecast'].'<div class="div_step"><div class="name_part">Прогнозное значение №'.$h.': <span class="span_value">'.number_format(1*$data_regression['Y_forecast'][$k]['forecast'],3,'.','').'</span>';
                 $runtime_string = ' при ( ';
                 foreach($data_regression['Z_forecast'][$k] as $kk=>$vv){
-                    if(isset($Head_name[$kk])){
+                    if(isset($Head_name[$kk]) && $Head_name[$kk] !== 'Свободный коэффициент'){
                         $runtime_string = $runtime_string.$Head_name[$kk].' => '.$vv.' ';
                     }/*else{
                         $runtime_string = $runtime_string.'Свободный коэффициент => '.$vv.' ';
@@ -3022,8 +3047,6 @@ class regression extends Model
     public static function report_regression($Y, $X, $Z='', $Head_name='', $Z_forecast = ''){
 
         $report = [];
-
-        //print_r(array_keys($Y[array_keys($Y)[0]])[0]);
 
         if(array_keys($Y[array_keys($Y)[0]])[0] === 0){
             return 'необходимо определить ключ для Y!';
@@ -3107,25 +3130,29 @@ class regression extends Model
             }
         }else if($Z==='1'){
 
+            $uniq_key = uniqid("COEF_", true);
+            $uniq_key = preg_replace('/\./', '_', $uniq_key);
+
             if(count(array_keys($X[array_keys($X)[0]])) === 1){
                 $Z = [];
                 foreach($X as $k1=>$v1){
-                    $Z[$k1]['free_coef'] = 1;
+                    $Z[$k1][$uniq_key] = 1;
                     foreach($v1 as $k2=>$v2){
                         $Z[$k1][$k2]=$v2;
                     }
                 }
                 if(is_array($Z_forecast)){
-                    foreach($Z_forecast as $k1=>$v1){
-                        $h = 0;
-                        foreach($v1 as $k2=>$v2){
-                            unset($Z_forecast[$k1][$k2]);
-                            $Z_forecast[$k1][array_keys($Z[array_keys($Z)[0]])[$h]] = $v2;
-                            $h = $h + 1;
+                    if(array_keys($Z_forecast[array_keys($Z_forecast)[0]])[0] !== array_keys($Z[array_keys($Z)[0]])[0]){
+                        foreach($Z_forecast as $k1=>$v1){
+                            $h = 0;
+                            foreach($v1 as $k2=>$v2){
+                                unset($Z_forecast[$k1][$k2]);
+                                $Z_forecast[$k1][array_keys($Z[array_keys($Z)[0]])[$h]] = $v2;
+                                $h = $h + 1;
+                            }
                         }
                     }
                 }
-
             }else if(count(array_keys($X[array_keys($X)[0]])) > 1){
                 $arr_keys_X = array_keys($X[array_keys($X)[0]]);
 
@@ -3155,25 +3182,93 @@ class regression extends Model
 
                 $Z = [];
                 foreach($X as $k1=>$v1){
-                    $Z[$k1]['free_coef'] = 1;
+                    $Z[$k1][$uniq_key] = 1;
                     foreach($v1 as $k2=>$v2){
                         $Z[$k1][$k2]=$v2;
                     }
                 }
 
                 if(is_array($Z_forecast)){
+                    if(array_keys($Z_forecast[array_keys($Z_forecast)[0]])[0] !== array_keys($Z[array_keys($Z)[0]])[0]){
+                        foreach($Z_forecast as $k1=>$v1){
+                            $h = 0;
+                            foreach($v1 as $k2=>$v2){
+                                unset($Z_forecast[$k1][$k2]);
+                                $Z_forecast[$k1][array_keys($Z[array_keys($Z)[0]])[$h]] = $v2;
+                                $h = $h + 1;
+                            }
+                        }
+                    }
                     foreach($delete_in_Z as $k1=>$v1){
                         foreach($Z_forecast as $k2=>$v2){
                             unset($Z_forecast[$k2][$k1]);
                         }
                     }
+                }
+            }
 
-                    foreach($Z_forecast as $k1=>$v1){
-                        $h = 0;
-                        foreach($v1 as $k2=>$v2){
-                            unset($Z_forecast[$k1][$k2]);
-                            $Z_forecast[$k1][array_keys($Z[array_keys($Z)[0]])[$h]] = $v2;
-                            $h = $h + 1;
+        }else{
+            // когда задан массив $Z
+
+            if(count(array_keys($X[array_keys($X)[0]])) === 1){
+                if(is_array($Z_forecast)){
+                    if(array_keys($Z_forecast[array_keys($Z_forecast)[0]])[0] !== array_keys($Z[array_keys($Z)[0]])[0]){
+                        foreach($Z_forecast as $k1=>$v1){
+                            $h = 0;
+                            foreach($v1 as $k2=>$v2){
+                                unset($Z_forecast[$k1][$k2]);
+                                $Z_forecast[$k1][array_keys($Z[array_keys($Z)[0]])[$h]] = $v2;
+                                $h = $h + 1;
+                            }
+                        }
+                    }
+                }
+            }else if(count(array_keys($X[array_keys($X)[0]])) > 1){
+                $arr_keys_X = array_keys($X[array_keys($X)[0]]);
+
+                $delete_in_Z = [];
+
+                foreach($arr_keys_X as $k1=>$v1){
+                    foreach($arr_keys_X as $k2=>$v2){
+                        if($v1 !== $v2){
+                            if(abs($report['correlation_data']['R_fin'][$v1][$v2]) > 0.5){
+                                if(abs($report['correlation_data']['R_fin'][ array_keys($Y[array_keys($Y)[0]])[0] ][$v1]) > abs($report['correlation_data']['R_fin'][ array_keys($Y[array_keys($Y)[0]])[0] ][$v2])){
+                                    $delete_in_Z[$v2] = $report['correlation_data']['R_fin'][ array_keys($Y[array_keys($Y)[0]])[0] ][$v2];
+                                }else{
+                                    $delete_in_Z[$v1] = $report['correlation_data']['R_fin'][ array_keys($Y[array_keys($Y)[0]])[0] ][$v1];
+                                }
+                            }
+                        }
+                    }
+                    if( abs($report['correlation_data']['R_fin'][ array_keys($Y[array_keys($Y)[0]])[0] ][$v1]) < 0.5 && !isset($delete_in_Z[$v1])){
+                        $delete_in_Z[$v1] = $report['correlation_data']['R_fin'][ array_keys($Y[array_keys($Y)[0]])[0] ][$v1];
+                    }
+                }
+                foreach($delete_in_Z as $k1=>$v1){
+                    foreach($X as $k2=>$v2){
+                        unset($X[$k2][$k1]);
+                    }
+                }
+                foreach($delete_in_Z as $k1=>$v1){
+                    foreach($Z as $k2=>$v2){
+                        unset($Z[$k2][$k1]);
+                    }
+                }
+
+                if(is_array($Z_forecast)){
+                    if(array_keys($Z_forecast[array_keys($Z_forecast)[0]])[0] !== array_keys($Z[array_keys($Z)[0]])[0]){
+                        foreach($Z_forecast as $k1=>$v1){
+                            $h = 0;
+                            foreach($v1 as $k2=>$v2){
+                                unset($Z_forecast[$k1][$k2]);
+                                $Z_forecast[$k1][array_keys($Z[array_keys($Z)[0]])[$h]] = $v2;
+                                $h = $h + 1;
+                            }
+                        }
+                    }
+                    foreach($delete_in_Z as $k1=>$v1){
+                        foreach($Z_forecast as $k2=>$v2){
+                            unset($Z_forecast[$k2][$k1]);
                         }
                     }
                 }
@@ -3181,12 +3276,500 @@ class regression extends Model
 
         }
 
+        if(isset($delete_in_Z) && count($delete_in_Z) > 0) {
+            $report['delete_param'] = $delete_in_Z;
+            $data_correlation = self::calculate_correlation_analisys($Y, $X);
+            $report['correlation_data_clear'] = $data_correlation;
+            $str_table_correlation = self::print_correlation_analisys($data_correlation, $Y, $X, $Head_name);
+            $report['print_correlation_clear'] = $str_table_correlation;
+        }
+
         $data_regression = self::calculate_regression_analisys($Y, $Z, $Z_forecast, $Head_name);
+        if($data_regression === false){return 'Невозможно провести анализ на введенных данных!';}else if(!isset($data_regression['Coef_regr'])){return $data_regression;}
         $report['regression_data'] = $data_regression;
-        $str_regression = self::print_regression_analisys($data_regression, $Y, $Z, $Head_name);
+        $str_regression = self::print_regression_analisys($data_regression, $Y, $Z, $Head_name, $Z_forecast);
         $report['print_regression'] = $str_regression;
 
+        return $report;
+
     }
+
+    //object regression interface
+
+    // пришлось сделать public чтобы в контроллах много не писать и вызывать этот метод там
+    public static function draw_setting_reg($in_base_id, $in_data_json){
+
+        $html_report = '<div id="'.$in_base_id.'_outher" style="width:850px;overflow-x:auto;padding-top:8px;background-color:#3A78D7;border-radius:8px;padding:8px;">';
+        $html_report = $html_report.'<div id="'.$in_base_id.'_descriptreg_specification" style="display:block;padding:8px;margin-bottom:8px;border-radius:8px;background-color:#D8D8D8;">Задайте спецификацию модели регрессии (Y = a<span style="font-size:8px;">0</span> + a<span style="font-size:8px;">1</span>X<span style="font-size:8px;">1</span> + a<span style="font-size:8px;">2</span>X<span style="font-size:8px;">2</span> + ... + a<span style="font-size:8px;">n</span>X<span style="font-size:8px;">n</span>):<br/>&#160;&#160;&#160;где<br/>&#160;&#160;&#160;Y - зависимая переменная (искомое прогнозное значение);<br/>&#160;&#160;&#160;X - независимая переменная (входное значение для рассчета по уравнению регрессии);<br/>&#160;&#160;&#160;a<span style="font-size:8px;">0</span> - свободный коэффициент;<br/>&#160;&#160;&#160;a<span style="font-size:8px;">1</span> ... a<span style="font-size:8px;">n</span> - коэффициенты регрессии при независимых переменных;</div>';
+        $html_report = $html_report.'<div id="'.$in_base_id.'_row_y" style="display:block;"><div style="display:table-cell;width:50px;font-weight:bold;text-align:center;">Y</div>';
+        $row_x = '<div id="'.$in_base_id.'_row_x" style="display:block;"><div style="display:table-cell;width:50px;font-weight:bold;text-align:center;">X</div>';
+        $row_name = '<div id="'.$in_base_id.'_row_name" style="display:block;"><div style="display:table-cell;width:50px;font-weight:bold;text-align:center;">NAME</div>';
+
+        foreach($in_data_json['head'] as $k=>$v){
+            $html_report = $html_report.'<div style="display:table-cell;width:120px;height:45px;text-align:center;"><input type="checkbox" this_value="'.$k.'" id="'.$k.'_yreg_'.$in_base_id.'" name="'.$v.'" class="'.$in_base_id.'_paramscale_map_reg_y"/></div>';
+            $row_x = $row_x.'<div style="display:table-cell;width:120px;height:45px;text-align:center;"><input type="checkbox" this_value="'.$k.'" id="'.$k.'_xreg_'.$in_base_id.'" name="'.$v.'" class="'.$in_base_id.'_paramscale_map_reg_x"/></div>';
+            $row_name = $row_name.'<div style="display:table-cell;width:120px;height:45px;text-align:center;"><div style="width:120px;overflow-x:auto;">'.$v.'</div></div>';
+        }
+
+        $html_report = $html_report.'</div>'.$row_x.'</div>'.$row_name.'</div><div style="padding-top:12px;padding-bottom:12px;"><input type="checkbox" this_value="coef" id="coef_xreg_'.$in_base_id.'_x0" name="Свободный коэффициент" class="'.$in_base_id.'_paramscale_map_reg_x0"/>&#160;Свободный коэффициент</div><div id="'.$in_base_id.'_forecast_x_area" style="width:835px;overflow-x:auto;" ></div><div id="'.$in_base_id.'_button_start_regression_area"><input type="button" id="'.$in_base_id.'_button_start_regression" value="Провести регрессионный анализ" /></div><div id="'.$in_base_id.'_result_regression_area"></div></div>';
+
+        return $html_report;
+
+    }
+    public static function draw_result_reg($in_data_json, $in_base_id, $in_checked_x, $in_checked_y, $in_a0, $x_forecast){
+
+        $Y_key_full = [];
+        $X_key_full = [];
+        $Head = [];
+
+        $z_forecast = '';
+
+        if(count($x_forecast) > 0){
+            $z_forecast = [];
+            $count_x_forecast = count($x_forecast);
+        }
+
+        if($in_a0 === 1){
+            $uniq_key = uniqid("COEF_", true);
+            $uniq_key = preg_replace('/\./', '_', $uniq_key);
+            $Head[$uniq_key] = 'Свободный коэффициент';
+            $Z_key_full = [];
+        }
+
+        $cur_x_forecast = 0;
+
+        foreach($in_checked_y as $k1=>$v1){
+            $Head[$k1] = $v1;
+            foreach($in_data_json['data'] as $k2=>$v2){
+                $cur_last = substr($k2, 1*strlen($k1.'_'));
+                if( GenF::index_of($k2, $k1.'_') === 0 && GenF::index_of($cur_last, '_') === -1){
+                    if($in_a0 === 1){
+                        array_push($Z_key_full, [$uniq_key=>1]);
+                        if(count($x_forecast) > 0 && $cur_x_forecast < $count_x_forecast){
+                            array_push($z_forecast, [$uniq_key=>1]);
+                            $cur_x_forecast = $cur_x_forecast + 1;
+                        }
+                    }
+                    array_push($Y_key_full, [$k1=>$v2]);
+                }
+            }
+        }
+
+        foreach($in_checked_x as $k1=>$v1){
+            $Head[$k1] = $v1;
+            foreach($in_data_json['data'] as $k2=>$v2){
+                $cur_last = substr($k2, (1*strlen($k1.'_')));
+                if( GenF::index_of($k2, $k1.'_') === 0 && GenF::index_of($cur_last, '_') ===-1){
+                    $cur_number = 1*substr($k2, GenF::last_index_of($k2, '_')+1) - 1;
+                    $X_key_full[$cur_number][$k1] = $v2;
+                    if($in_a0 === 1){
+                        $Z_key_full[$cur_number][$k1] = $v2;
+                    }
+                }
+            }
+        }
+
+        if(count($x_forecast) > 0){
+            foreach($x_forecast as $k1=>$v1){
+                foreach($v1 as $k2=>$v2){
+                    $z_forecast[$k1][$k2] = $v2;
+                }
+            }
+        }
+
+
+        if($in_a0 !== 1){
+            $Z_key_full = $X_key_full;
+        }
+
+        $reg_data = self::report_regression($Y_key_full, $X_key_full, $Z_key_full, $Head, $z_forecast);
+
+        if(!isset($reg_data['print_correlation'])){return $reg_data;}
+
+        $return_html =
+            '<div id="'.$in_base_id.'_res_regrcor">'.
+                '<div id="'.$in_base_id.'_res_correl" style="margin:5px;padding:5px;background-color:white;border: 1px solid grey;">'.
+                    $reg_data['print_correlation'].
+                '</div>';
+        if(isset($reg_data['print_correlation_clear'])){
+
+                $str_delete_param = '(';
+                foreach($reg_data['delete_param'] as $k1=>$v1){$str_delete_param = $str_delete_param.'"'.$Head[$k1].'", ';}
+                $str_delete_param = substr($str_delete_param, 0, strlen($str_delete_param)-2);
+                $str_delete_param = $str_delete_param.')';
+
+        $return_html = $return_html.
+                '<div id="'.$in_base_id.'_res_correl_clear" style="margin:5px;padding:5px;background-color:white;border: 1px solid grey;">'.
+                    '<div style="color:#FF5C5C;font-weight:bold;">ВНИМАНИЕ! в связи с обнаружением мультиколлинеарности в данных, были удалены из дальнейшего анализа следующие переменные '.$str_delete_param.'</div>'.
+                    $reg_data['print_correlation_clear'].
+                '</div>';
+        }
+        $return_html = $return_html.
+                '<div id="'.$in_base_id.'_res_reg" style="margin:5px;padding:5px;background-color:white;border: 1px solid grey;">'.
+                    '<div id="'.$in_base_id.'_res_reg_base" style="padding-bottom:15px;">'.
+                        $reg_data['print_regression']['base'].
+                    '</div>'.
+                    '<div id="'.$in_base_id.'_res_reg_dispersion_analisys" style="margin-top:5px;padding-top:15px;margin-bottom:5px;padding-bottom:15px;border-top: 1px solid grey;">'.
+                        $reg_data['print_regression']['dispersion_analisys'].
+                    '</div>'.
+                    '<div id="'.$in_base_id.'_res_reg_ipsurreg" style="margin-top:5px;padding-top:15px;margin-bottom:5px;padding-bottom:15px;border-top: 1px solid grey;">'.
+                        $reg_data['print_regression']['ipsurreg'].
+                    '</div>';
+        if(count($x_forecast) > 0){
+            $return_html = $return_html.
+                    '<div id="'.$in_base_id.'_res_reg_build_forecast" style="margin-top:5px;padding-top:15px;margin-bottom:5px;padding-bottom:15px;border-top: 1px solid grey;">'.
+                        $reg_data['print_regression']['build_forecast'].
+                    '</div>'.
+                '</div>'.
+            '</div><div style="padding:8px;"><input type="button" id="'.$in_base_id.'_save_report" target_source="'.$in_base_id.'_res_regrcor" value="Сохранить отчет"></div>';
+        }else{
+            $return_html = $return_html.
+                '</div>'.
+            '</div><div style="padding:8px;"><input type="button" id="'.$in_base_id.'_save_report" target_source="'.$in_base_id.'_res_regrcor" value="Сохранить отчет"></div>';
+        }
+
+        //return '<xmp>'.print_r($reg_data).'</xmp>';
+
+        return $return_html;
+    }
+
+    private $base_id;
+    private $analisys_data_json='';
+    public $set_d_d = 0;
+
+    function __construct($base_id, $analisys_data_json=''){
+        $this->base_id = $base_id;
+        if($analisys_data_json !== '' && is_string($analisys_data_json)){
+            if(GenF::is_json_string($analisys_data_json)){
+                $this->analisys_data_json = Json::decode($analisys_data_json);
+            }else{
+                return 'Строка не конвертируется в json данные';
+            }
+        }else if($analisys_data_json !== '' && is_array($analisys_data_json)){
+            $this->analisys_data_json = $analisys_data_json;
+        }
+
+        $for_js_json_data = '';
+        if($this->analisys_data_json !== ''){
+            $for_js_json_data = htmlspecialchars(Json::encode($this->analisys_data_json));
+        }
+
+        // для ajax
+        $getCsrfToken = Yii::$app->request->getCsrfToken();
+        $regstart = Url::to(['regression/ajaxreportregression']);
+
+        $jsCode =<<<JS
+
+        var base_id_$this->base_id = "$this->base_id";
+        var json_data_$this->base_id = "$for_js_json_data";
+
+        var ret_x_checker_$this->base_id = function(x_class){
+            
+            var local_checked_x = {};
+            
+            $(x_class).each(function(i,e){
+                if($(e).prop('checked') === true){
+                    local_checked_x[$(e).attr('this_value')] = $(e).attr('name');
+                }
+            });
+            
+            return local_checked_x;
+            
+        };
+
+        var ret_y_checker_$this->base_id = function(y_class){
+
+            var local_checked_y = {};
+            
+            $(y_class).each(function(i,e){
+                if($(e).prop('checked') === true){
+                    local_checked_y[$(e).attr('this_value')] = $(e).attr('name');
+                }
+            });
+            
+            return local_checked_y;
+            
+        };
+        
+        var valid_checker_$this->base_id = function(x_class, y_class){
+            
+            var local_checked_x = {};
+            var local_checked_y = {};
+            
+            $(x_class).each(function(i,e){
+                if($(e).prop('checked') === true){
+                    local_checked_x[$(e).attr('this_value')] = $(e).attr('name');
+                }
+            });
+            $(y_class).each(function(i,e){
+                if($(e).prop('checked') === true){
+                    local_checked_y[$(e).attr('this_value')] = $(e).attr('name');
+                }
+            });
+            
+            if(Object.keys(local_checked_x).length !== 0 && Object.keys(local_checked_y).length !== 0){
+                return true;
+            }else{
+                return false;
+            }
+
+        };
+        
+        $(document).on("click", "#$this->base_id"+"_button_start_regression", function(){
+            
+            var checked_x = ret_x_checker_$this->base_id(".$this->base_id"+"_paramscale_map_reg_x");
+            var checked_y = ret_y_checker_$this->base_id(".$this->base_id"+"_paramscale_map_reg_y");
+            
+            if(Object.keys(checked_x).length === 0){
+                alert('Необходимо задать хотя бы одну независимую переменную X');
+                return false;
+            }
+            if(Object.keys(checked_y).length === 0){
+                alert('Необходимо задать зависимую (прогнозируемую) переменную Y');
+                return false;
+            }
+            
+            var a0_coef = 0;
+            if($('#coef_xreg_'+"$this->base_id"+'_x0').prop('checked') === true){
+                a0_coef = 1;
+            }
+
+            var x_forecast_source = {};
+            if($(".$this->base_id"+'_row_val_forecast_x').length > 0){
+                $(".$this->base_id"+'_row_val_forecast_x').each(function(i, el){
+                    $("[class='$this->base_id"+"_value_forecast_x'][row_numb='"+(i+1)+"']").each(function(i2, el2){
+                        if(!x_forecast_source[1*$(el2).attr('row_numb') - 1]){
+                            x_forecast_source[1*$(el2).attr('row_numb') - 1] = {};
+                        }
+                        x_forecast_source[1*$(el2).attr('row_numb') - 1][$(el2).attr('key')] = 1*$(el2).val();
+                    });
+                });
+            }
+            
+            $.ajax({
+                type: "POST",
+                url: "$regstart",
+                data: {_csrf: "$getCsrfToken", data_json: json_data_$this->base_id, base_id: "$this->base_id", checked_x: checked_x, checked_y: checked_y, a0: a0_coef, x_forecast: x_forecast_source},
+                success: function(data){
+                    if($("#$this->base_id"+"_result_regression_area").length > 0){
+                        console.log(data);
+                        $("#$this->base_id"+"_result_regression_area").html(data);
+                    }
+                }
+            });
+            
+        });
+
+        $(document).on("click", "#$this->base_id"+'_add_forecast_x_row', function(){
+            
+            var checked_x = ret_x_checker_$this->base_id(".$this->base_id"+"_paramscale_map_reg_x");
+            var col_row_x = $(".$this->base_id"+'_row_val_forecast_x').length;
+            col_row_x = col_row_x + 1;
+            var json_data_as_obj = JSON.parse(json_data_$this->base_id);
+
+            var html_row_x = '';
+            
+            if($(".$this->base_id"+"_row_label_forecast_x").length === 0){
+                html_row_x = '<div style="display:block;padding:8px;" class="'+"$this->base_id"+'_row_label_forecast_x" >';
+                for(var key in checked_x){
+                    html_row_x = html_row_x+'<div style="display:table-cell;width:150px;text-align:center;overflow-x:auto;">'+json_data_as_obj['head'][key]+'</div>';
+                }
+                html_row_x = html_row_x+'</div>';
+            }
+            
+            html_row_x = html_row_x+'<div style="display:block;padding:8px;" class="'+"$this->base_id"+'_row_val_forecast_x" >';
+            for(var key in checked_x){
+                html_row_x = html_row_x+'<div style="display:table-cell;width:150px;"><input class="'+"$this->base_id"+'_value_forecast_x" style="width:100%;" key="'+key+'" row_numb="'+col_row_x+'" /></div>';
+            }
+            html_row_x = html_row_x + "</div>";
+            
+            $("#$this->base_id"+'_forecast_x_area').append(html_row_x);
+            
+        });
+        
+        $(document).on("click", "#$this->base_id"+"_save_report", function(){
+            var source = $('#'+$(this).attr('target_source')).html();
+            
+            source = '<style> .correlation_table_style{border-collapse:collapse;}'+
+                '.correlation_td_style{text-align:center;border:1px solid grey;padding:3px;}'+
+                '.correlation_span_top{font-weight:bold;color:#0539A9;}'+
+                '.correlation_span_bottom{font-weight:bold;color:#F45B04;}'+
+                '.span_value{font-size:16px;font-style:normal;color:#FF9A18;font-weight:bold;}'+
+                '.span_value_true{font-size:16px;font-style:normal;color:#258A31;font-weight:bold;}'+
+                '.span_value_false{font-size:16px;font-style:normal;color:#FF5C5C;font-weight:bold;}'+
+                '.span_value_true_comment{font-size:12px;font-style:italic;color:#1F7729;font-weight:bold;}'+
+                '.span_value_false_comment{font-size:12px;font-style:italic;color:#8E3131;font-weight:bold;}'+
+                '.div_comment{font-size:12px;font-style:italic;color:#3A78D7;}'+
+                '.div_step{padding-left:30px;}'+
+                '.name_section{text-decoration:underline;padding-top:8px;padding-bottom:3px;}'+
+                '.name_part{font-style:italic;padding-top:16px;padding-bottom:3px;}'+
+                '.name_analisys{font-weight:bold;padding-bottom:8px;}'+
+                '.uravn_regression_color{color:#FF9A18;}'+
+                '.description_coef_reg{color:#3A78D7;padding-top:3px;}'+
+                '.hr{width:100%;border-top:1px dotted #D8D8D8;margin-top:3px;margin-bottom:3px;}'+
+                '.span_bold{font-weight:bold;} </style>' + source;
+            
+            var today = new Date();
+            var dd = String(today.getDate()).padStart(2, '0');
+            var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+            var yyyy = today.getFullYear();
+            today = dd + '_' + mm + '_' + yyyy;
+            
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:text/html;text,'+encodeURIComponent(source)+'');
+            element.setAttribute('download', 'report_regression_'+today+'.html');
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        });
+        
+        $(document).on("click", ".$this->base_id"+"_paramscale_map_reg_y", function(){
+        	var this_value = $(this).attr('this_value');
+            $(".$this->base_id"+"_paramscale_map_reg_y").each(function (i, el){
+                if($(el).prop('checked') === true && $(el).attr('this_value') !== this_value){
+                    $(el).prop('checked', false);
+                }
+            });
+            $(".$this->base_id"+"_paramscale_map_reg_x").each(function (i, el){
+                if($(el).prop('checked') === true && $(el).attr('this_value') === this_value){
+                    $(el).prop('checked', false);
+                }
+            });
+            
+            $("#$this->base_id"+'_forecast_x_area').html('');
+            
+            if(valid_checker_$this->base_id(".$this->base_id"+"_paramscale_map_reg_x", ".$this->base_id"+"_paramscale_map_reg_y")){
+                $("#$this->base_id"+'_forecast_x_area').html('<input type="button" id="'+"$this->base_id"+'_add_forecast_x_row" value="+ добавить данные для прогнозного значения" />');
+            }
+
+        });
+
+        $(document).on("click", ".$this->base_id"+"_paramscale_map_reg_x", function(){
+            var this_value = $(this).attr('this_value');
+            $(".$this->base_id"+"_paramscale_map_reg_y").each(function (i, el){
+                if($(el).prop('checked') === true && $(el).attr('this_value') === this_value){
+                    $(el).prop('checked', false);
+                }
+            });
+            
+            $("#$this->base_id"+'_forecast_x_area').html('');
+            
+            if(valid_checker_$this->base_id(".$this->base_id"+"_paramscale_map_reg_x", ".$this->base_id"+"_paramscale_map_reg_y")){
+                $("#$this->base_id"+'_forecast_x_area').html('<input type="button" id="'+"$this->base_id"+'_add_forecast_x_row" value="+ добавить данные для прогнозного значения" />');
+            }
+        });
+        
+JS;
+
+        Yii::$app->view->registerJs($jsCode);
+
+    }
+
+    public function set_dynamic_data($selector_trigger, $name_trigger){
+
+        $this->set_d_d = 1;
+
+        // для ajax
+        $getCsrfToken = Yii::$app->request->getCsrfToken();
+        $regsetdata = Url::to(['regression/settingreg']);
+
+        $jqueryCode =<<<JS
+        
+        if("$selector_trigger" === "document"){
+            $(document).on("$name_trigger", function(event, json_data){
+                if(json_data === undefined || json_data === '' || json_data === [] || json_data === {}){
+                    alert('Триггер должен возвращать данные в формате json!');
+                }else{
+                    json_data_$this->base_id = JSON.stringify(json_data);
+                    
+                    $.ajax({
+                        type: "POST",
+                        url: "$regsetdata",
+                        data: {_csrf: "$getCsrfToken", data_json: JSON.stringify(json_data), base_id: "$this->base_id"},
+                        success: function(data){
+                            if($("#$this->base_id"+"_area_regression_analisys").length > 0){
+                                $("#$this->base_id"+"_area_regression_analisys").html(data);
+                            }
+                        }
+                    });
+                }
+            }); 
+        }else if("$selector_trigger" === "window"){
+            $(window).on("$name_trigger", function(event, json_data){
+                if(json_data === undefined || json_data === '' || json_data === [] || json_data === {}){
+                    alert('Триггер должен возвращать данные в формате json!');
+                }else{
+                    json_data_$this->base_id = JSON.stringify(json_data);
+                    
+                    $.ajax({
+                        type: "POST",
+                        url: "$regsetdata",
+                        data: {_csrf: "$getCsrfToken", data_json: JSON.stringify(json_data), base_id: "$this->base_id"},
+                        success: function(data){
+                            if($("#$this->base_id"+"_area_regression_analisys").length > 0){
+                                $("#$this->base_id"+"_area_regression_analisys").html(data);
+                            }
+                        }
+                    });
+                }
+            });
+        }else{
+            $("$selector_trigger").on("$name_trigger", function(event, json_data){
+                if(json_data === undefined || json_data === '' || json_data === [] || json_data === {}){
+                    alert('Триггер должен возвращать данные в формате json!');
+                }else{
+                    json_data_$this->base_id = JSON.stringify(json_data);
+                    
+                    $.ajax({
+                        type: "POST",
+                        url: "$regsetdata",
+                        data: {_csrf: "$getCsrfToken", data_json: JSON.stringify(json_data), base_id: "$this->base_id"},
+                        success: function(data){
+                            if($("#$this->base_id"+"_area_regression_analisys").length > 0){
+                                $("#$this->base_id"+"_area_regression_analisys").html(data);
+                            }
+                        }
+                    });
+                }
+            });
+        }
+        
+JS;
+
+        Yii::$app->view->registerJs($jqueryCode);
+
+    }
+
+    public function set_regression($style_area='display:block;margin-top:30px;'){
+
+        if($this->set_d_d === 1){
+            echo '<div id="'.$this->base_id.'_area_regression_analisys" style="'.$style_area.'">';
+            echo '</div>';
+        }else{
+
+        }
+
+        /*
+        $html_report = '<div id="'.$this->base_id.'_outher" style="width:850px;overflow-x:auto;padding-top:8px;background-color:#3A78D7;border-radius:8px;padding:8px;">';
+        $html_report = $html_report.'<div id="'.$this->base_id.'_descriptreg_specification" style="display:block;padding:8px;margin-bottom:8px;border-radius:8px;background-color:#D8D8D8;">Задайте спецификацию модели регрессии (Y = a<sub>0</sub> + a<sub>1</sub>X<sub>1</sub> + a<sub>2</sub>X<sub>2</sub> + ... + a<sub>n</sub>X<sub>n</sub>):<br/>&#160;&#160;&#160;где<br/>&#160;&#160;&#160;Y - зависимая переменная (искомое прогнозное значение);<br/>&#160;&#160;&#160;X - независимая переменная (входное значение для рассчета по уравнению регрессии);<br/>&#160;&#160;&#160;a<sub>0</sub> - свободный коэффициент;<br/>&#160;&#160;&#160;a<sub>1</sub> ... a<sub>n</sub> - коэффициенты регрессии при независимых переменных;</div>';
+        $html_report = $html_report.'<div id="'.$this->base_id.'_row_y" style="display:block;"><div style="display:table-cell;width:50px;font-weight:bold;text-align:center;">Y</div>';
+        $row_x = '<div id="'.$this->base_id.'_row_x" style="display:block;"><div style="display:table-cell;width:50px;font-weight:bold;text-align:center;">X</div>';
+        $row_name = '<div id="'.$this->base_id.'_row_name" style="display:block;"><div style="display:table-cell;width:50px;font-weight:bold;text-align:center;">NAME</div>';
+
+        foreach(self::$data_json['head'] as $k=>$v){
+            $html_report = $html_report.'<div style="display:table-cell;width:120px;height:45px;text-align:center;"><input type="checkbox" this_value="'.$k.'" id="'.$k.'_yreg_'.$this->base_id.'" name="'.$v.'" class="'.$this->base_id.'_paramscale_map_reg_y"/></div>';
+            $row_x = $row_x.'<div style="display:table-cell;width:120px;height:45px;text-align:center;"><input type="checkbox" this_value="'.$k.'" id="'.$k.'_xreg_'.$this->base_id.'" name="'.$v.'" class="'.$this->base_id.'_paramscale_map_reg_x"/></div>';
+            $row_name = $row_name.'<div style="display:table-cell;width:120px;height:45px;text-align:center;"><div style="width:120px;overflow-x:auto;">'.$v.'</div></div>';
+        }
+
+        $html_report = $html_report.'</div>'.$row_x.'</div>'.$row_name.'</div><div id="'.$this->base_id.'_button_start_regression_area"><input type="button" id="'.$this->base_id.'_button_start_regression" value="Провести регрессионный анализ" /></div> <div id="'.$this->base_id.'_result_regression_area"></div></div>';
+
+        return $html_report;
+        */
+
+    }
+
 
 }
 

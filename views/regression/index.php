@@ -7,6 +7,7 @@ use app\models\GenF;
 use app\models\tag;
 use yii\helpers\Html;
 use app\models\DBM;
+use app\models\Ajax;
 use yii\helpers\Json;
 use yii\helpers\Url;
 use app\models\matrix;
@@ -45,7 +46,39 @@ $X2_key_1_full = [['coef'=>1,'keyX2'=>445.4],['coef'=>1,'keyX2'=>486.6],['coef'=
 
 $X2_fall = [['coef'=>445.4,'keyX2'=>445.4],['coef'=>486,'keyX2'=>486.6],['coef'=>507,'keyX2'=>507],['coef'=>524,'keyX2'=>524.4],['coef'=>1,'keyX2'=>515.2],['coef'=>1,'keyX2'=>548.2],['coef'=>1,'keyX2'=>572.6],['coef'=>1,'keyX2'=>548.2],['coef'=>1,'keyX2'=>591.5],['coef'=>1,'keyX2'=>609.8],['coef'=>1,'keyX2'=>601.7],['coef'=>1,'keyX2'=>635.9],['coef'=>1,'keyX2'=>633.6],['coef'=>1,'keyX2'=>643.8],['coef'=>1,'keyX2'=>707.9],['coef'=>1,'keyX2'=>678],['coef'=>1,'keyX2'=>722.6],['coef'=>1,'keyX2'=>701.7],['coef'=>1,'keyX2'=>738.8],['coef'=>1,'keyX2'=>807.5],['coef'=>1,'keyX2'=>843.6],['coef'=>1,'keyX2'=>866.3],['coef'=>1,'keyX2'=>843.3],['coef'=>1,'keyX2'=>874.4],['coef'=>1,'keyX2'=>887.5],['coef'=>1,'keyX2'=>893.3],['coef'=>1,'keyX2'=>921.4],   ['coef'=>1,'keyX2'=>930.8],['coef'=>1,'keyX2'=>1009.2],['coef'=>1,'keyX2'=>1119.3]];
 
-regression::report_regression($Y_key_full, $X2_key_full, '1',['keyY'=>'Ключ Y', 'keyX1'=>'Ключ X1', 'keyX2'=>'Ключ X2'], [['coef'=>1,'keyX2'=>1010], ['coef'=>1,'keyX2'=>1021]]);
+//regression::report_regression($Y_key_full, $X2_key_full, '1',['keyY'=>'Ключ Y', 'keyX1'=>'Ключ X1', 'keyX2'=>'Ключ X2'], [['coef'=>1,'keyX2'=>1010], ['coef'=>1,'keyX2'=>1021]]);
+
+
+
+$consolid_data = [['keyY'=>2296.5 ,'keyX2'=>445.4],
+    ['keyY'=>2247 ,'keyX2'=>486.6],
+    ['keyY'=>2372.6 ,'keyX2'=>507],
+    ['keyY'=>2242.4 ,'keyX2'=>524.4],
+    ['keyY'=>2347.8 ,'keyX2'=>515.2],
+    ['keyY'=>2384.9 ,'keyX2'=>548.2],
+    ['keyY'=>2401.2 ,'keyX2'=>572.6],
+    ['keyY'=>2656.2 ,'keyX2'=>548.2],
+    ['keyY'=>2584.6 ,'keyX2'=>591.5],
+    ['keyY'=>2765.4 ,'keyX2'=>609.8],
+    ['keyY'=>2976.8 ,'keyX2'=>601.7],
+    ['keyY'=>3144 ,'keyX2'=>635.9],
+    ['keyY'=>3433 ,'keyX2'=>633.6],
+    ['keyY'=>3525.9 ,'keyX2'=>643.8],
+    ['keyY'=>3744.2 ,'keyX2'=>707.9],
+    ['keyY'=>3507.7 ,'keyX2'=>678],
+    ['keyY'=>3532.9 ,'keyX2'=>722.6],
+    ['keyY'=>3748.9 ,'keyX2'=>701.7],
+    ['keyY'=>3826.4 ,'keyX2'=>738.8],
+    ['keyY'=>3923.1 ,'keyX2'=>807.5],
+    ['keyY'=>3875.2 ,'keyX2'=>843.6],
+    ['keyY'=>4014.3 ,'keyX2'=>866.3],
+    ['keyY'=>3902.1 ,'keyX2'=>843.3],
+    ['keyY'=>4209.9 ,'keyX2'=>874.4],
+    ['keyY'=>4612.1 ,'keyX2'=>887.5],
+    ['keyY'=>4869.7 ,'keyX2'=>893.3],
+    ['keyY'=>5113.3 ,'keyX2'=>921.4]];
+
+//echo Json::encode($consolid_data);
 
 echo '<input type="button" style="margin:8px;" value="Задать данные для графика" id="show_btn"/>';
 
@@ -54,8 +87,105 @@ $dial_1->set_dialog_style('background-color:orange;min-width:440px;');
 $dial_1->set_template('input_regression_data');
 $dial_1->on_show_hide('show_btn');
 
-$graph_1 = new graph_canvas('test_graph_id');
+$base_graph_id = 'test_graph_id';
+
+$graph_1 = new graph_canvas($base_graph_id);
 $graph_1->set_dynamic_data('#test_dialog_id', 'test_dialog_id_rec_dialog_complete');
 $graph_1->set_graph();
+
+
+$test_json = Json::decode('{"head":{"fyv":"фыв", "vap":"вап"},"data":{"fyv_1":"1","vap_1":"4","fyv_2":"2","vap_2":"5","fyv_3":"3","vap_3":"6"},"color":{"fyv":"8,184,244","vap":"193,87,168"}}');
+$regr_1 = new regression('regression_cur_report', $test_json);
+$regr_1->set_dynamic_data('#test_dialog_id', 'test_dialog_id_rec_dialog_complete');
+$regr_1->set_regression();
+
+
+
+
+
+echo '<br/><br/><br/><br/><br/><br/>';
+
+
+
+
+/*
+echo '<div id="area_regression_analisys" style="display:block;padding-top:30px;">';
+echo '</div>';
+
+$getCsrfToken = Yii::$app->request->getCsrfToken();
+$regsetdata = Url::to(['regression/settingreg']);
+$regstart = Url::to(['regression/ajaxreportregression']);
+$base_id_regr = 'regression_cur_report';
+
+$page_js = <<<JS
+    $(document).ready(function(){
+        
+        function detect_checked(){
+            
+        }
+        
+        $('#test_dialog_id').on('test_dialog_id_rec_dialog_complete', function(event, arr){
+
+            var checked_x = {};
+            var checked_y = {};
+            
+            $(".$base_graph_id"+"_paramscale_map_graph_x").each(function(i,e){
+                if($(e).prop('checked') === true){
+                    checked_x[$(e).attr('this_value')] = $(e).attr('name');
+                }
+            });
+            $(".$base_graph_id"+"_paramscale_map_graph_y").each(function(i,e){
+                if($(e).prop('checked') === true){
+                    checked_y[$(e).attr('this_value')] = $(e).attr('name');
+                }
+            });
+            
+            console.log(checked_x);
+            console.log(checked_y);
+            
+            $.ajax({
+                type: "POST",
+                url: "$regsetdata",
+                data: {_csrf: "$getCsrfToken", data_json: JSON.stringify(arr), base_id: "$base_id_regr"},
+                success: function(data){
+                    $("#area_regression_analisys").html(data);
+                    
+                }
+            });
+            
+        });
+        
+        
+        $(document).on('click', '#regression_cur_report_button_start_regression', function(){
+
+            $.ajax({
+                type: "POST",
+                url: "$regstart",
+                data: {_csrf: "$getCsrfToken"},
+                success: function(data){
+                    
+                    console.log(data);
+                    
+                    //$("#area_regression_analisys").html(data);
+                    
+                }
+            });
+            
+        });
+        
+        
+    });
+
+    
+
+JS;
+Yii::$app->view->registerJs($page_js);
+*/
+
+
+
+
+//Ajax::field('button', 'Провести регрессионный анализ', 'start_regression_analisys', 'regression/ajaxreport');
+    //, $id_result='', $script_result='', $style='', $data_arr=[], $type_ajax='POST');
 
 ?>

@@ -29,21 +29,24 @@ use \app\models\Ajax;
 
 echo '<div style="font-size:16px;font-weight:bold;padding-bottom:12px;">Проекты:</div>';
 
+/*
 echo '<div>';
 echo Html::a('Проект "НОВОСТИ"', ['news/index']);
 echo '</div>';
+*/
 
 echo '<div>';
-echo Html::a('Проект "КНИЖНЫЙ МАГАЗИН"', ['shopb/index']);
+echo Html::a('Проект "Книжный магазин"', ['shopb/index']);
 echo '</div>';
 
 echo '<div>';
-echo Html::a('Таглист', ['taglist/index']);
+echo Html::a('Проект "Визуализация данных и регрессионный анализ"', ['regression/index']);
 echo '</div>';
 
 echo '<div>';
-echo Html::a('Проект "РЕГРЕССИЯ"', ['regression/index']);
+echo Html::a('Проект "Таглист"', ['taglist/index']);
 echo '</div>';
+
 
 
 /*

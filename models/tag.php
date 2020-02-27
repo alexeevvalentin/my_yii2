@@ -255,7 +255,7 @@ JS;
 
         //$data = htmlspecialchars($data);
 
-        $tag_source = '<div id="'.$this_id.'_id_outer" style="display:inline-block;height:27px;"><input type="text" id="'.$this_id.'" name="'.$class_name.'['.$name.']" '.$options.' value="'.$set_value.'" /></div>';
+        $tag_source = '<div id="'.$this_id.'_id_outer" style="display:inline-block;height:27px;float:left;"><input type="text" id="'.$this_id.'" name="'.$class_name.'['.$name.']" '.$options.' value="'.$set_value.'" /></div>';
 
         echo $tag_source;
 
@@ -287,7 +287,7 @@ JS;
             }
 
             var this_id = selector.attr("id")+"_btn";
-            selector.parent().append('<div id="'+this_id+'" class="ecocombo_btn" style="position:relative;left:'+(selector.width()+3)+'px;top:-24px;width:18px;height:16px;font-size:9px;cursor:pointer;text-align:center;padding-top:5px;">&#9660;</div>');
+            selector.parent().append('<div id="'+this_id+'" class="'+this_id+'_class_ecocombo_btn" style="position:relative;left:'+(selector.width()+3)+'px;top:-24px;width:18px;height:25px;font-size:9px;cursor:pointer;text-align:center;padding-top:5px;">&#9660;</div>');
             var button_selector = $('#'+this_id);
 
             function arr_sorti_local(arr, sort_stb){
@@ -460,7 +460,7 @@ JS;
                 source = arr_sorti_local(source);
                 
                 var list_id = selector.attr('id')+'_list';
-                var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;z-index:1000;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 5)+'px;max-height:'+(26*max_show)+'px;font-size:'+selector.css('font-size')+';border:1px solid grey;"></div>';
+                var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;z-index:1000;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 25)+'px;max-height:'+(26*max_show)+'px;font-size:'+selector.css('font-size')+';border:1px solid grey;"></div>';
                 selector.parent().append(list_html);
                 
                 var list_selector_filter = $('#'+list_id);
@@ -623,8 +623,8 @@ JS;
                 
                 current_value = selector.val();
                 var dpos = data_in.indexOf(current_value);
-                
-                if(dpos !== -1 && current_value.trim() !== ''){
+
+                if(dpos !== -1 && current_value.trim() !== '' && current_list !== '' && current_list !== undefined){
                     selector.parent().append(current_list);
                     var list_id = selector.attr('id')+'_list';
                     var list_selector = $('#'+list_id);
@@ -673,7 +673,7 @@ JS;
                     if(data_in === '' || data_in === undefined){return false;}
                     
                     var list_id = selector.attr('id')+'_list';
-                    var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;z-index:1000;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 5)+'px;font-size:'+selector.css('font-size')+';border:1px solid grey;"></div>';
+                    var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;z-index:1000;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 25)+'px;font-size:'+selector.css('font-size')+';border:1px solid grey;"></div>';
                     selector.parent().append(list_html);
                     var list_selector = $('#'+list_id);
                     list_selector.mouseleave(function(){ $(this).remove();});

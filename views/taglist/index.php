@@ -25,7 +25,7 @@ $f_j_arr_full = $file_json_full;
     <div style="font-weight:bold;">ecocombo</div>
     <div style="font-style:italic;">Экономичное combo (select), на 10000 строк данных</div>
 </div>
-<div style="padding-top:3px;padding-bottom:12px;">
+<div style="padding-top:3px;padding-bottom:12px;height:38px;">
     <?php tag::ecocombo('model', 'kladr10000', $f_j_arr, ['placeholder'=>'Выберите объект кладера', 'style'=>'width:300px;']); ?>
 </div>
 
@@ -33,7 +33,7 @@ $f_j_arr_full = $file_json_full;
     <div style="font-weight:bold;">ecocombo</div>
     <div style="font-style:italic;">Экономичное combo (select), на 228818 строк данных (полный набор данных KLADR.DBF)(Поиск регистронезависимый)</div>
 </div>
-<div style="padding-top:3px;padding-bottom:12px;">
+<div style="padding-top:3px;padding-bottom:12px;height:38px;">
     <?php tag::ecocombo('model', 'kladr_i', $f_j_arr_full, ['placeholder'=>'Выберите объект кладера', 'style'=>'width:300px;']); ?>
 </div>
 
@@ -41,7 +41,7 @@ $f_j_arr_full = $file_json_full;
     <div style="font-weight:bold;">ecocombo</div>
     <div style="font-style:italic;">Экономичное combo (select), на 228818 строк данных (полный набор данных KLADR.DBF)(Поиск регистрозависимый)</div>
 </div>
-<div style="padding-top:3px;padding-bottom:12px;">
+<div style="padding-top:3px;padding-bottom:12px;height:38px;">
     <?php tag::ecocombo('model', 'kladr', $f_j_arr_full, ['placeholder'=>'Выберите объект кладера', 'style'=>'width:300px;'], null, "", 100, 8); ?>
 </div>
 

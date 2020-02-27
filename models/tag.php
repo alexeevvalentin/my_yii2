@@ -216,19 +216,20 @@ JS;
 
     }
 
-    public static function ecocombo($model, $name, $data='', $options='', $set_value=null, $search_case="i", $max_count=100, $max_show=8){
+    public static function ecocombo($model, $name, $data='', $options='', $set_value=null, $search_case="i", $max_count=100, $max_show=8, $key_hide=0){
 
         if(is_array($data) || is_object($data)){
+            if(is_array($data)){$data = GenF::array_to_object($data);}
             foreach($data as $k=>$v){
                 if(is_string($v)){
-                    $data[$k] = htmlspecialchars($v);
+                    $data->{$k} = htmlspecialchars($v);
                 }
             }
-            $data = Json::encode($data);
+            $data = json_encode($data,1);
         }
 
         if($data == ''){
-            $data = Json::encode([]);
+            $data = Json::encode((object)[]);
         }
 
         $this_id = self::tag_symb($name);
@@ -254,25 +255,26 @@ JS;
 
         //$data = htmlspecialchars($data);
 
-        $tag_source = '<input type="text" id="'.$this_id.'" name="'.$class_name.'['.$name.']" '.$options.' value="'.$set_value.'" />';
+        $tag_source = '<div id="'.$this_id.'_id_outer" style="display:inline-block;height:27px;"><input type="text" id="'.$this_id.'" name="'.$class_name.'['.$name.']" '.$options.' value="'.$set_value.'" /></div>';
 
         echo $tag_source;
 
         $jsTag =<<<JS
 
-        
         var selector_this_id = $("#$this_id");
         
         var p_search_case = "$search_case"; 
         var p_max_count = $max_count;
         var p_max_show = $max_show;
         var p_data = $data;
+        var key_hide = $key_hide;
         
-        var anon_ecocombo_$this_id = function(selector, s_case, max_count, max_show, data_in){
+        var anon_ecocombo_$this_id = function(selector, s_case, max_count, max_show, data_in, key_hide){
 
             max_count = max_count || 100; 
             max_show = max_show || 8; 
             data_in = data_in || '';
+            key_hide = key_hide || 0;
             
             var source;
             var O_K_source;
@@ -285,7 +287,7 @@ JS;
             }
 
             var this_id = selector.attr("id")+"_btn";
-            selector.parent().append('<div id="'+this_id+'" class="ecocombo_btn" style="position:relative;left:'+(selector.width()-16)+'px;top:-24px;width:18px;height:16px;font-size:9px;cursor:pointer;text-align:center;padding-top:5px;">&#9660;</div>');
+            selector.parent().append('<div id="'+this_id+'" class="ecocombo_btn" style="position:relative;left:'+(selector.width()+3)+'px;top:-24px;width:18px;height:16px;font-size:9px;cursor:pointer;text-align:center;padding-top:5px;">&#9660;</div>');
             var button_selector = $('#'+this_id);
 
             function arr_sorti_local(arr, sort_stb){
@@ -317,7 +319,11 @@ JS;
 
                         for(var i = diap_s; i < 1*diap_e; i++){
                             if(O_K_source[i] !== undefined){
-                                clist.append('<div class="'+list_id+'_option_row" code="'+cdata[O_K_source[i]][1]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+cdata[O_K_source[i]][1]+'</div><div style="display:table-cell;padding:3px;text-overflow:ellipsis;">'+cdata[O_K_source[i]][2]+'</div></div>');
+                                if(key_hide === 0){
+                                    clist.append('<div class="'+list_id+'_option_row" code="'+cdata[O_K_source[i]][1]+'" clear_name="'+cdata[O_K_source[i]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+cdata[O_K_source[i]][1]+'</div><div style="display:table-cell;padding:3px;text-overflow:ellipsis;">'+cdata[O_K_source[i]][2]+'</div></div>');
+                                }else{
+                                    clist.append('<div class="'+list_id+'_option_row" code="'+cdata[O_K_source[i]][1]+'" clear_name="'+cdata[O_K_source[i]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;text-overflow:ellipsis;">'+cdata[O_K_source[i]][2]+'</div></div>');
+                                }
                             }
                         }
                         
@@ -334,7 +340,11 @@ JS;
 
                         for(var i = diap_s; i < 1*diap_e; i++){
                             if(O_K_source[i] !== undefined){
-                                clist.append('<div class="'+list_id+'_option_row" code="'+cdata[O_K_source[i]][1]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+cdata[O_K_source[i]][1]+'</div><div style="display:table-cell;padding:3px;text-overflow:ellipsis;">'+cdata[O_K_source[i]][2]+'</div></div>');
+                                if(key_hide === 0){
+                                    clist.append('<div class="'+list_id+'_option_row" code="'+cdata[O_K_source[i]][1]+'" clear_name="'+cdata[O_K_source[i]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+cdata[O_K_source[i]][1]+'</div><div style="display:table-cell;padding:3px;text-overflow:ellipsis;">'+cdata[O_K_source[i]][2]+'</div></div>');
+                                }else{
+                                    clist.append('<div class="'+list_id+'_option_row" code="'+cdata[O_K_source[i]][1]+'" clear_name="'+cdata[O_K_source[i]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;text-overflow:ellipsis;">'+cdata[O_K_source[i]][2]+'</div></div>');
+                                }
                             }
                         }
 
@@ -342,36 +352,41 @@ JS;
                 }
             }
             
-            function recurs_data_list_i(data_text, cur_value, final_text, step){
+            function recurs_data_list(data_text, cur_value, final_text, step, regexp_config){
                 
                 step = step || 0;
+                regexp_config = regexp_config || "";
                 
                 step = step + 1;
                 
-                //datatextIOCV = data_text.indexOf(cur_value);
-                //datatextIOCV2 = data_text.indexOf('"'+cur_value+'"');
-                
-                if(cur_value === ','){if(1*data_text.search(new RegExp(cur_value, "i")) === (1 + 1*data_text.search(new RegExp('"'+cur_value+'"', "i")))){return false;}}
+                if(cur_value === ','){if(1*data_text.search(new RegExp(cur_value, regexp_config)) === (1 + 1*data_text.search(new RegExp('"'+cur_value+'"', regexp_config)))){return false;}}
                 else if(cur_value === '"'){return false;}
                 else if(cur_value === ''){return false;}
                 else if(cur_value === '{'){return false;}
                 else if(cur_value === '}'){return false;}
-                else if(cur_value === ':'){if(1*data_text.search(new RegExp(cur_value, "i")) === (1 + 1*data_text.search(new RegExp('"'+cur_value+'"', "i")))){return false;}}
+                else if(cur_value === '['){return false;}
+                else if(cur_value === ']'){return false;}
+                else if(cur_value === ':'){if(1*data_text.search(new RegExp(cur_value, regexp_config)) === (1 + 1*data_text.search(new RegExp('"'+cur_value+'"', regexp_config)))){return false;}}
 
-                if(data_text.search(new RegExp(cur_value, "i")) !== -1){
+                if(data_text.search(new RegExp(cur_value, regexp_config)) !== -1){
                     // больше max_count в селекте нет смысла отображать для поиска
                     if(step < max_count){
-                        var prom_data_begin = data_text.substr(0, data_text.search(new RegExp(cur_value, "i")));
+                        var prom_data_begin = data_text.substr(0, data_text.search(new RegExp(cur_value, regexp_config)));
                         if(prom_data_begin.lastIndexOf('","') !== -1){var index_begin = prom_data_begin.lastIndexOf('","') + ('","').length;}
-                        else{if(prom_data_begin.indexOf('{') === 0){var index_begin = 0;if(final_text === undefined){final_text = '';}}}
+                        else{
+                            if(prom_data_begin.indexOf('{') === 0){
+                                var index_begin = 0;
+                                if(final_text === undefined){final_text = '';}
+                            }
+                        }
                         if(final_text === undefined){final_text = '{"';}
-                        var prom_data_end = data_text.substr(data_text.search(new RegExp(cur_value, "i")));
+                        var prom_data_end = data_text.substr(data_text.search(new RegExp(cur_value, regexp_config)));
                         var prom_data_end_delim = prom_data_end.indexOf('","');
                         if(prom_data_end_delim === -1){prom_data_end_delim = prom_data_end.indexOf('}');}
-                        var index_end = 1*(data_text.search(new RegExp(cur_value, "i"))) + 1*prom_data_end_delim;
-                        final_text = final_text + data_text.substr(1*index_begin , (1*(data_text.search(new RegExp(cur_value, "i"))) - 1*index_begin) + 1*prom_data_end_delim)+'","';
-                        data_text = data_text.substr(1*index_begin + (1*(data_text.search(new RegExp(cur_value, "i"))) - 1*index_begin) + 1*prom_data_end_delim);
-                        return recurs_data_list_i(data_text, cur_value, final_text, step);
+                        var index_end = 1*(data_text.search(new RegExp(cur_value, regexp_config))) + 1*prom_data_end_delim;
+                        final_text = final_text + data_text.substr(1*index_begin , (1*(data_text.search(new RegExp(cur_value, regexp_config))) - 1*index_begin) + 1*prom_data_end_delim)+'","';
+                        data_text = data_text.substr(1*index_begin + (1*(data_text.search(new RegExp(cur_value, regexp_config))) - 1*index_begin) + 1*prom_data_end_delim);
+                        return recurs_data_list(data_text, cur_value, final_text, step, regexp_config);
                     }else{
                         if(final_text !== undefined){
                             if(final_text.indexOf('","') !== -1){
@@ -401,64 +416,7 @@ JS;
                     }else{return false;}
                 }
             }
-    
-            function recurs_data_list(data_text, cur_value, final_text, step){
-                
-                step = step || 0;
-                
-                step = step + 1;
-                
-                if(cur_value === ','){if(1*data_text.indexOf(cur_value) === (1 + 1*data_text.indexOf('"'+cur_value+'"'))){return false;}}
-                else if(cur_value === '"'){return false;}
-                else if(cur_value === ''){return false;}
-                else if(cur_value === '{'){return false;}
-                else if(cur_value === '}'){return false;}
-                else if(cur_value === ':'){if(1*data_text.indexOf(cur_value) === (1 + 1*data_text.indexOf('"'+cur_value+'"'))){return false;}}
-
-                if(data_text.indexOf(cur_value) !== -1){
-                    // больше max_count в селекте нет смысла отображать для поиска
-                    if(step < max_count){
-                        var prom_data_begin = data_text.substr(0, data_text.indexOf(cur_value));
-                        if(prom_data_begin.lastIndexOf('","') !== -1){var index_begin = prom_data_begin.lastIndexOf('","') + ('","').length;}
-                        else{if(prom_data_begin.indexOf('{') === 0){var index_begin = 0;if(final_text === undefined){final_text = '';}}}
-                        if(final_text === undefined){final_text = '{"';}
-                        var prom_data_end = data_text.substr(data_text.indexOf(cur_value));
-                        var prom_data_end_delim = prom_data_end.indexOf('","');
-                        if(prom_data_end_delim === -1){prom_data_end_delim = prom_data_end.indexOf('}');}
-                        var index_end = 1*(data_text.indexOf(cur_value)) + 1*prom_data_end_delim;
-                        final_text = final_text + data_text.substr(1*index_begin , (1*(data_text.indexOf(cur_value)) - 1*index_begin) + 1*prom_data_end_delim)+'","';
-                        data_text = data_text.substr(1*index_begin + (1*(data_text.indexOf(cur_value)) - 1*index_begin) + 1*prom_data_end_delim);
-                        return recurs_data_list(data_text, cur_value, final_text, step);
-                    }else{
-                        if(final_text !== undefined){
-                            if(final_text.indexOf('","') !== -1){
-                                if(final_text.indexOf('"","')!==-1){
-                                    if(final_text.length === (final_text.indexOf('"","')+('"","').length)){
-                                        final_text = final_text.substr(0, final_text.length - ('","').length)+'}';
-                                    }else{
-                                        final_text = final_text.substr(0, final_text.length - ('","').length)+'"}';
-                                    }
-                                }else{final_text = final_text.substr(0, final_text.length - ('","').length)+'"}';}
-                                return final_text;
-                            }else{return false;}
-                        }else{return false;}
-                    }
-                }else{
-                    if(final_text !== undefined){
-                        if(final_text.indexOf('","') !== -1){
-                            if(final_text.indexOf('"","')!==-1){
-                                if(final_text.length === (final_text.indexOf('"","')+('"","').length)){
-                                    final_text = final_text.substr(0, final_text.length - ('","').length)+'}';
-                                }else{
-                                    final_text = final_text.substr(0, final_text.length - ('","').length)+'"}';
-                                }
-                            }else{final_text = final_text.substr(0, final_text.length - ('","').length)+'"}';}
-                            return final_text;
-                        }else{return false;}
-                    }else{return false;}
-                }
-            }
-
+            
             var current_list;
             
             var last_event_mover;
@@ -485,7 +443,7 @@ JS;
 
                 button_selector.attr('diap_s', '');
                 button_selector.attr('diap_e', '');
-                
+
                 $(this).attr('code', '');
                 $(this).attr('value', '');
                 if($('#'+selector.attr('id')+'_list').length > 0){ $('#'+selector.attr('id')+'_list').remove(); }
@@ -493,19 +451,16 @@ JS;
                 var data_text_clear = '';
                 var cur_value = $(this).val();
                 
-                if(s_case === 'i'){
-                    data_text_clear = recurs_data_list_i(data_in, cur_value, undefined);
-                }else{
-                    data_text_clear = recurs_data_list(data_in, cur_value, undefined);
-                }
+                data_text_clear = recurs_data_list(data_in, cur_value, undefined, 0, s_case);
 
                 if(data_text_clear === false){return false;}
-    
+                
                 var source = JSON.parse(data_text_clear);
+                
                 source = arr_sorti_local(source);
                 
                 var list_id = selector.attr('id')+'_list';
-                var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;z-index:1000;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 5)+'px;max-height:'+(26*max_show)+'px;"></div>';
+                var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;z-index:1000;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 5)+'px;max-height:'+(26*max_show)+'px;font-size:'+selector.css('font-size')+';border:1px solid grey;"></div>';
                 selector.parent().append(list_html);
                 
                 var list_selector_filter = $('#'+list_id);
@@ -537,15 +492,19 @@ JS;
                         setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_btn !== 1){list_selector_filter.remove();}}, 0);
                     }
                 );
-    
+
                 for(var i in source){
-                    list_selector_filter.append('<div class="'+list_id+'_option_row" code="'+source[O_K_source[i]][1]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+source[O_K_source[i]][1]+'</div><div style="display:table-cell;padding:3px;">'+source[O_K_source[i]][2]+'</div></div>');
+                    if(key_hide === 0){
+                        list_selector_filter.append('<div class="'+list_id+'_option_row" code="'+source[O_K_source[i]][1]+'" clear_name="'+source[O_K_source[i]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+source[O_K_source[i]][1]+'</div><div style="display:table-cell;padding:3px;">'+source[O_K_source[i]][2]+'</div></div>');
+                    }else{
+                        list_selector_filter.append('<div class="'+list_id+'_option_row" code="'+source[O_K_source[i]][1]+'" clear_name="'+source[O_K_source[i]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;">'+source[O_K_source[i]][2]+'</div></div>');
+                    }
                 }
                 
                 current_list = $('#'+list_id)[0].outerHTML;
 
             });
-            
+
             $(document).keydown(function(e){
                 var selector_list = $('#'+selector.attr('id')+'_list');
                 if(selector_list.length > 0){
@@ -626,12 +585,21 @@ JS;
             $(document).on("click", "."+selector.attr("id")+"_list_option_row", function(){
 
                 selector.attr('code', $(this).attr('code'));
+                selector.attr('clear_name', $(this).attr('clear_name'));
 
                 if($(this).children('div').eq(0).html()!==''){
-                    selector.val($(this).children('div').eq(0).html()+' - '+$(this).children('div').eq(1).html());
+                    if($(this).children('div').eq(1).length > 0){
+                        selector.val($(this).children('div').eq(0).html()+' - '+$(this).children('div').eq(1).html());
+                    }else{
+                        selector.val($(this).children('div').eq(0).html());
+                    }
                     selector.attr('value', $(this).attr('code'));
                 }else{
-                    selector.val($(this).children('div').eq(1).html());
+                    if($(this).children('div').eq(1).length > 0){
+                        selector.val($(this).children('div').eq(1).html());
+                    }else{
+                        selector.val($(this).children('div').eq(0).html());
+                    }
                     selector.attr('value', $(this).attr('code'));
                 }
                 
@@ -705,7 +673,7 @@ JS;
                     if(data_in === '' || data_in === undefined){return false;}
                     
                     var list_id = selector.attr('id')+'_list';
-                    var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;z-index:1000;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 5)+'px;"></div>';
+                    var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;z-index:1000;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 5)+'px;font-size:'+selector.css('font-size')+';border:1px solid grey;"></div>';
                     selector.parent().append(list_html);
                     var list_selector = $('#'+list_id);
                     list_selector.mouseleave(function(){ $(this).remove();});
@@ -753,9 +721,12 @@ JS;
                     });
                     
                     for(var i = attr_start; i < 1*attr_end; i++){
-        
                         if(O_K_source[i] !== undefined){
-                            list_selector.append('<div class="'+list_id+'_option_row" code="'+source[O_K_source[i]][1]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:21px;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+source[O_K_source[i]][1]+'</div><div style="display:table-cell;padding:3px;">'+source[O_K_source[i]][2]+'</div></div>');
+                            if(key_hide === 0){
+                                list_selector.append('<div class="'+list_id+'_option_row" code="'+source[O_K_source[i]][1]+'" clear_name="'+source[O_K_source[i]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:21px;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+source[O_K_source[i]][1]+'</div><div style="display:table-cell;padding:3px;">'+source[O_K_source[i]][2]+'</div></div>');
+                            }else{
+                                list_selector.append('<div class="'+list_id+'_option_row" code="'+source[O_K_source[i]][1]+'" clear_name="'+source[O_K_source[i]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:21px;"><div style="display:table-cell;padding:3px;">'+source[O_K_source[i]][2]+'</div></div>');
+                            }
                         }else{
                             $(this).attr('diap_e', 1*i);
                             break;
@@ -765,7 +736,7 @@ JS;
             });
         };
 
-        anon_ecocombo_$this_id(selector_this_id, p_search_case, p_max_count, p_max_show, p_data);
+        anon_ecocombo_$this_id(selector_this_id, p_search_case, p_max_count, p_max_show, p_data, key_hide);
         
 JS;
 

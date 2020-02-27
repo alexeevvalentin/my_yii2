@@ -5,8 +5,12 @@
 //print_r(Yii::$app->db->createCommand('SELECT * FROM books')->queryAll());
 //print_r(Books::model()->findByAttributes(array('name'=>'222')));
 
-echo '<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>';
-echo '<script src="http://code.jquery.com/jquery-1.8.3.js"></script>';
+//echo '<script src="https://d3js.org/d3.v5.js"></script>';
+//echo '<script src="https://d3js.org/d3.v5.min.js"></script>';
+//echo '<script src="https://d3js.org/d3-selection.v1.js"></script>';
+
+echo '<script src="https://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>';
+echo '<script src="https://code.jquery.com/jquery-1.8.3.js"></script>';
 echo '<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>';
 echo '<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">';
 echo '<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">';
@@ -41,6 +45,10 @@ echo '</div>';
 
 echo '<div>';
 echo Html::a('Проект "Визуализация данных и регрессионный анализ"', ['regression/index']);
+echo '</div>';
+
+echo '<div>';
+echo Html::a('Проект "SERG"', ['serg/index']);
 echo '</div>';
 
 echo '<div>';

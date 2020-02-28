@@ -572,7 +572,7 @@ JS;
                 source = arr_sorti_local(source);
                 
                 var list_id = selector.attr('id')+'_list';
-                var list_html = '<div id="'+list_id+'_outer" style="width:0px;height:0px;"><div id="'+list_id+'" style="top:'+ (-1*selector.parent().height()) +'px;left:0px;overflow-y:scroll;position:relative;z-index:1000;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 25 + 1*width_list)+'px;font-size:'+selector.css('font-size')+';border:1px solid grey;"></div></div>';
+                var list_html = '<div id="'+list_id+'_outer" style="width:0px;height:0px;"><div id="'+list_id+'" style="top:'+ (-1*selector.parent().height()) +'px;left:0px;overflow-y:scroll;position:relative;z-index:1000;background-color:white;padding:3px;cursor:default;max-height:250px;width:'+(selector.width() + 25 + 1*width_list)+'px;font-size:'+selector.css('font-size')+';border:1px solid grey;"></div></div>';
                 selector.parent().append(list_html);
                 
                 var list_selector_filter = $('#'+list_id);
@@ -794,7 +794,7 @@ JS;
                     if(data_in === '' || data_in === undefined){return false;}
                     
                     var list_id = selector.attr('id')+'_list';
-                    var list_html = '<div id="'+list_id+'_outer" style="width:0px;height:0px;"><div id="'+list_id+'" style="top:'+ (-1*selector.parent().height()) +'px;left:0px;overflow-y:scroll;position:relative;z-index:1000;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 25 + 1*width_list)+'px;font-size:'+selector.css('font-size')+';border:1px solid grey;"></div></div>';
+                    var list_html = '<div id="'+list_id+'_outer" style="width:0px;height:0px;"><div id="'+list_id+'" style="top:'+ (-1*selector.parent().height()) +'px;left:0px;overflow-y:scroll;position:relative;z-index:1000;background-color:white;padding:3px;cursor:default;max-height:250px;width:'+(selector.width() + 25 + 1*width_list)+'px;font-size:'+selector.css('font-size')+';border:1px solid grey;"></div></div>';
                     selector.parent().append(list_html);
                     var list_selector = $('#'+list_id);
                     list_selector.mouseleave(function(){

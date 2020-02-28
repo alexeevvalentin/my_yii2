@@ -216,7 +216,7 @@ JS;
 
     }
 
-    public static function ecocombo($model, $name, $data='', $options='', $set_value=null, $search_case="i", $max_count=100, $max_show=8, $key_hide=0){
+    public static function ecocombo($model, $name, $data='', $options='', $set_value=null, $search_case="i", $max_count=100, $max_show=8, $key_hide=0, $width_list=0){
 
         if(is_array($data) || is_object($data)){
             if(is_array($data)){$data = GenF::array_to_object($data);}
@@ -255,7 +255,7 @@ JS;
 
         //$data = htmlspecialchars($data);
 
-        $tag_source = '<div id="'.$this_id.'_id_outer" style="display:inline-block;height:27px;float:left;"><input type="text" id="'.$this_id.'" name="'.$class_name.'['.$name.']" '.$options.' value="'.$set_value.'" /></div>';
+        $tag_source = '<div style="height:27px;"><div id="'.$this_id.'_id_outer" style="display:inline-block;height:27px;float:left;"><input type="text" id="'.$this_id.'" name="'.$class_name.'['.$name.']" '.$options.' value="'.$set_value.'" /></div></div>';
 
         echo $tag_source;
 
@@ -268,17 +268,42 @@ JS;
         var p_max_show = $max_show;
         var p_data = $data;
         var key_hide = $key_hide;
+        var width_list = $width_list;
         
-        var anon_ecocombo_$this_id = function(selector, s_case, max_count, max_show, data_in, key_hide){
+        var anon_ecocombo_$this_id = function(selector, s_case, max_count, max_show, data_in, key_hide, width_list){
 
             max_count = max_count || 100; 
             max_show = max_show || 8; 
             data_in = data_in || '';
             key_hide = key_hide || 0;
             
+            var open_tag = '{';
+            var close_tag = '}';
+            
             var source;
             var O_K_source;
+            
+            var fl_class = 0;
+            if(selector.attr('class')!==undefined && selector.attr('class')!==''){
+                fl_class = 1;
+            }
 
+            if(fl_class === 1){
+                var classList = selector.attr('class').split(/\s+/);
+                var str_selector_class = '';
+                for(var keyclass in classList){
+                    if(1*keyclass === 0){
+                        str_selector_class = '.'+classList[keyclass];
+                    }else{
+                        str_selector_class = str_selector_class+', .'+classList[keyclass];
+                    }
+                }
+                
+                selector.change(function(e){
+                    setTimeout(function(){ $(str_selector_class).trigger("ecocombo_on_change", [selector, e]); }, 0);
+                });
+            }
+            
             if(data_in === '' || data_in === undefined){}else{
                 data_in = JSON.stringify(data_in);
                 source = JSON.parse(data_in);
@@ -293,13 +318,59 @@ JS;
             function arr_sorti_local(arr, sort_stb){
                 
                 sort_stb = sort_stb || 0;
-                
+
+                var flag = 0;
                 var sortable = [];
-                for (var vehicle in arr) {sortable.push([1*vehicle, vehicle, arr[vehicle]]);}
+                for (var vehicle in arr) {
+                    if(typeof arr[vehicle] === 'object'){
+                        if(flag === 0){flag = 1;}
+                        var rt_arr = [1*vehicle, vehicle];
+                        for (var vehicle2 in arr[vehicle]) {
+                            rt_arr.push(arr[vehicle][vehicle2]);
+                        }
+                        sortable.push(rt_arr);
+                    }else{
+                        sortable.push([1*vehicle, vehicle, arr[vehicle]]);
+                    }
+                }
+                
+                if(flag === 1){
+                    open_tag = '{{';
+                    close_tag = '}}';
+                }
+                
                 sortable.sort(function(a, b) {return a[sort_stb] - b[sort_stb]});
                 return sortable;
             }
-                
+            
+            function draw_list(clist, diap_s, diap_e, O_K_source, source, list_id){
+                if(diap_s === 'none' && diap_e === 'none'){
+                    for(var inkey in source){
+                        if(O_K_source[inkey] !== undefined){
+                            var comment_dop = '';
+                            if(source[O_K_source[inkey]][3]){comment_dop='<div style="display:table-cell;font-style:italic;color:grey;font-size:10px;">'+source[O_K_source[inkey]][3]+'</div>';}
+                            if(key_hide === 0){
+                                clist.append('<div class="'+list_id+'_option_row" code="'+source[O_K_source[inkey]][1]+'" clear_name="'+source[O_K_source[inkey]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div class="'+list_id+'_opt_key" style="display:table-cell;padding:3px;font-weight:bold;">'+source[O_K_source[inkey]][1]+'</div><div class="'+list_id+'_opt_val"  style="display:table-cell;padding:3px;text-overflow:ellipsis;">'+source[O_K_source[inkey]][2]+'</div>'+comment_dop+'</div>');
+                            }else{
+                                clist.append('<div class="'+list_id+'_option_row" code="'+source[O_K_source[inkey]][1]+'" clear_name="'+source[O_K_source[inkey]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div class="'+list_id+'_opt_val" style="display:table-cell;padding:3px;text-overflow:ellipsis;">'+source[O_K_source[inkey]][2]+'</div>'+comment_dop+'</div>');
+                            }
+                        }
+                    }
+                }else{
+                    for(var i = diap_s; i < 1*diap_e; i++){
+                        if(O_K_source[i] !== undefined){
+                            var comment_dop = '';
+                            if(source[O_K_source[i]][3]){comment_dop='<div style="display:table-cell;font-style:italic;color:grey;font-size:10px;">'+source[O_K_source[i]][3]+'</div>';}
+                            if(key_hide === 0){
+                                clist.append('<div class="'+list_id+'_option_row" code="'+source[O_K_source[i]][1]+'" clear_name="'+source[O_K_source[i]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div class="'+list_id+'_opt_key" style="display:table-cell;padding:3px;font-weight:bold;">'+source[O_K_source[i]][1]+'</div><div class="'+list_id+'_opt_val"  style="display:table-cell;padding:3px;text-overflow:ellipsis;">'+source[O_K_source[i]][2]+'</div>'+comment_dop+'</div>');
+                            }else{
+                                clist.append('<div class="'+list_id+'_option_row" code="'+source[O_K_source[i]][1]+'" clear_name="'+source[O_K_source[i]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div class="'+list_id+'_opt_val" style="display:table-cell;padding:3px;text-overflow:ellipsis;">'+source[O_K_source[i]][2]+'</div>'+comment_dop+'</div>');
+                            }
+                        }
+                    }
+                }
+            }
+            
             function combo_step_scroll(clist, cbutton, cdata, fl){
                 var diap_s = cbutton.attr('diap_s');
                 var diap_e = cbutton.attr('diap_e');
@@ -315,17 +386,9 @@ JS;
                         cbutton.attr('diap_s', diap_s);
                         cbutton.attr('diap_e', diap_e);
                         clist.html('');
-                        list_id = clist.attr('id');
+                        var list_id = clist.attr('id');
 
-                        for(var i = diap_s; i < 1*diap_e; i++){
-                            if(O_K_source[i] !== undefined){
-                                if(key_hide === 0){
-                                    clist.append('<div class="'+list_id+'_option_row" code="'+cdata[O_K_source[i]][1]+'" clear_name="'+cdata[O_K_source[i]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+cdata[O_K_source[i]][1]+'</div><div style="display:table-cell;padding:3px;text-overflow:ellipsis;">'+cdata[O_K_source[i]][2]+'</div></div>');
-                                }else{
-                                    clist.append('<div class="'+list_id+'_option_row" code="'+cdata[O_K_source[i]][1]+'" clear_name="'+cdata[O_K_source[i]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;text-overflow:ellipsis;">'+cdata[O_K_source[i]][2]+'</div></div>');
-                                }
-                            }
-                        }
+                        draw_list(clist, diap_s, diap_e, O_K_source, cdata, list_id);
                         
                     }else if(fl === 2){
                         diap_s = 1*cbutton.attr('diap_s') - 1;
@@ -336,18 +399,9 @@ JS;
                         cbutton.attr('diap_s', diap_s);
                         cbutton.attr('diap_e', diap_e);
                         clist.html('');
-                        list_id = clist.attr('id');
+                        var list_id = clist.attr('id');
 
-                        for(var i = diap_s; i < 1*diap_e; i++){
-                            if(O_K_source[i] !== undefined){
-                                if(key_hide === 0){
-                                    clist.append('<div class="'+list_id+'_option_row" code="'+cdata[O_K_source[i]][1]+'" clear_name="'+cdata[O_K_source[i]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+cdata[O_K_source[i]][1]+'</div><div style="display:table-cell;padding:3px;text-overflow:ellipsis;">'+cdata[O_K_source[i]][2]+'</div></div>');
-                                }else{
-                                    clist.append('<div class="'+list_id+'_option_row" code="'+cdata[O_K_source[i]][1]+'" clear_name="'+cdata[O_K_source[i]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;text-overflow:ellipsis;">'+cdata[O_K_source[i]][2]+'</div></div>');
-                                }
-                            }
-                        }
-
+                        draw_list(clist, diap_s, diap_e, O_K_source, cdata, list_id);
                     }
                 }
             }
@@ -358,7 +412,7 @@ JS;
                 regexp_config = regexp_config || "";
                 
                 step = step + 1;
-                
+
                 if(cur_value === ','){if(1*data_text.search(new RegExp(cur_value, regexp_config)) === (1 + 1*data_text.search(new RegExp('"'+cur_value+'"', regexp_config)))){return false;}}
                 else if(cur_value === '"'){return false;}
                 else if(cur_value === ''){return false;}
@@ -368,52 +422,107 @@ JS;
                 else if(cur_value === ']'){return false;}
                 else if(cur_value === ':'){if(1*data_text.search(new RegExp(cur_value, regexp_config)) === (1 + 1*data_text.search(new RegExp('"'+cur_value+'"', regexp_config)))){return false;}}
 
-                if(data_text.search(new RegExp(cur_value, regexp_config)) !== -1){
-                    // больше max_count в селекте нет смысла отображать для поиска
-                    if(step < max_count){
-                        var prom_data_begin = data_text.substr(0, data_text.search(new RegExp(cur_value, regexp_config)));
-                        if(prom_data_begin.lastIndexOf('","') !== -1){var index_begin = prom_data_begin.lastIndexOf('","') + ('","').length;}
-                        else{
-                            if(prom_data_begin.indexOf('{') === 0){
-                                var index_begin = 0;
-                                if(final_text === undefined){final_text = '';}
+                if(open_tag === '{' && close_tag === '}'){
+                    if(data_text.search(new RegExp(cur_value, regexp_config)) !== -1){
+                        // больше max_count в селекте нет смысла отображать для поиска
+                        if(step < max_count){
+                            var prom_data_begin = data_text.substr(0, data_text.search(new RegExp(cur_value, regexp_config)));
+                            if(prom_data_begin.lastIndexOf('","') !== -1){
+                                var index_begin = prom_data_begin.lastIndexOf('","') + ('","').length;}
+                            else{
+                                if(prom_data_begin.indexOf(open_tag) === 0){
+                                    var index_begin = 0;
+                                    if(final_text === undefined){final_text = '';}
+                                }
                             }
+                            if(final_text === undefined){final_text = open_tag+'"';}
+                            var prom_data_end = data_text.substr(data_text.search(new RegExp(cur_value, regexp_config)));
+                            var prom_data_end_delim = prom_data_end.indexOf('","');
+                            if(prom_data_end_delim === -1){prom_data_end_delim = prom_data_end.indexOf(close_tag);}
+                            var index_end = 1*(data_text.search(new RegExp(cur_value, regexp_config))) + 1*prom_data_end_delim;
+                            final_text = final_text + data_text.substr(1*index_begin , (1*(data_text.search(new RegExp(cur_value, regexp_config))) - 1*index_begin) + 1*prom_data_end_delim)+'","';
+                            data_text = data_text.substr(1*index_begin + (1*(data_text.search(new RegExp(cur_value, regexp_config))) - 1*index_begin) + 1*prom_data_end_delim);
+                            return recurs_data_list(data_text, cur_value, final_text, step, regexp_config);
+                        }else{
+                            if(final_text !== undefined){
+                                if(final_text.indexOf('","') !== -1){
+                                    if(final_text.indexOf('"","')!==-1){
+                                        if(final_text.length === (final_text.indexOf('"","')+('"","').length)){
+                                            final_text = final_text.substr(0, final_text.length - ('","').length)+''+close_tag;
+                                        }else{
+                                            final_text = final_text.substr(0, final_text.length - ('","').length)+'"'+close_tag;
+                                        }
+                                    }else{final_text = final_text.substr(0, final_text.length - ('","').length)+'"'+close_tag;}
+                                    return final_text;
+                                }else{return false;}
+                            }else{return false;}
                         }
-                        if(final_text === undefined){final_text = '{"';}
-                        var prom_data_end = data_text.substr(data_text.search(new RegExp(cur_value, regexp_config)));
-                        var prom_data_end_delim = prom_data_end.indexOf('","');
-                        if(prom_data_end_delim === -1){prom_data_end_delim = prom_data_end.indexOf('}');}
-                        var index_end = 1*(data_text.search(new RegExp(cur_value, regexp_config))) + 1*prom_data_end_delim;
-                        final_text = final_text + data_text.substr(1*index_begin , (1*(data_text.search(new RegExp(cur_value, regexp_config))) - 1*index_begin) + 1*prom_data_end_delim)+'","';
-                        data_text = data_text.substr(1*index_begin + (1*(data_text.search(new RegExp(cur_value, regexp_config))) - 1*index_begin) + 1*prom_data_end_delim);
-                        return recurs_data_list(data_text, cur_value, final_text, step, regexp_config);
                     }else{
+    
                         if(final_text !== undefined){
                             if(final_text.indexOf('","') !== -1){
                                 if(final_text.indexOf('"","')!==-1){
                                     if(final_text.length === (final_text.indexOf('"","')+('"","').length)){
-                                        final_text = final_text.substr(0, final_text.length - ('","').length)+'}';
+                                        final_text = final_text.substr(0, final_text.length - ('","').length)+''+close_tag;
                                     }else{
-                                        final_text = final_text.substr(0, final_text.length - ('","').length)+'"}';
+                                        final_text = final_text.substr(0, final_text.length - ('","').length)+'"'+close_tag;
                                     }
-                                }else{final_text = final_text.substr(0, final_text.length - ('","').length)+'"}';}
+                                }else{final_text = final_text.substr(0, final_text.length - ('","').length)+'"'+close_tag;}
                                 return final_text;
                             }else{return false;}
                         }else{return false;}
                     }
                 }else{
-                    if(final_text !== undefined){
-                        if(final_text.indexOf('","') !== -1){
-                            if(final_text.indexOf('"","')!==-1){
-                                if(final_text.length === (final_text.indexOf('"","')+('"","').length)){
-                                    final_text = final_text.substr(0, final_text.length - ('","').length)+'}';
-                                }else{
-                                    final_text = final_text.substr(0, final_text.length - ('","').length)+'"}';
+
+                    if(data_text.search(new RegExp(cur_value, regexp_config)) !== -1){
+                        // больше max_count в селекте нет смысла отображать для поиска
+                        if(step < max_count){
+                            
+                            var prom_data_begin = data_text.substr(0, data_text.search(new RegExp(cur_value, regexp_config)));
+
+                            if(prom_data_begin.lastIndexOf('},"') !== -1){
+                                var index_begin = prom_data_begin.lastIndexOf('},"') + ('},"').length;}
+                            else{
+                                //source               = begin: source[Object.keys(source)[0]][Object.keys(source[Object.keys(source)[0]])[0]] - as id in db
+                                //as data_text from db = end: 0 (always Zero as in db) ! normalized view matches input data structure ['id1'=>['val1', 'comm1'], 'id2'=>['val2', 'comm2']] for comment
+                                if(prom_data_begin.indexOf('{"' + source[Object.keys(source)[0]][Object.keys(source[Object.keys(source)[0]])[0]] + '":{"0":"') === 0){
+                                    var index_begin = 0;
+                                    if(final_text === undefined){final_text = '';}
                                 }
-                            }else{final_text = final_text.substr(0, final_text.length - ('","').length)+'"}';}
-                            return final_text;
+                            }
+
+                            var prom_data_end = data_text.substr(data_text.search(new RegExp(cur_value, regexp_config)));
+                            var prom_data_end_delim = prom_data_end.indexOf('},"');
+                            if(prom_data_end_delim === -1){prom_data_end_delim = prom_data_end.indexOf(close_tag);}
+                            var index_end = 1*(data_text.search(new RegExp(cur_value, regexp_config))) + 1*prom_data_end_delim;
+                            
+                            var plus_fin = data_text.substr(1*index_begin , (1*(data_text.search(new RegExp(cur_value, regexp_config))) - 1*index_begin) + 1*prom_data_end_delim)+'},"'
+                            
+                            if(final_text === undefined){
+                                var begin_f_t = '{"'+plus_fin;
+                                begin_f_t = begin_f_t.substr(0, begin_f_t.indexOf('":"') + ('":"').length);
+                                final_text = begin_f_t + plus_fin.substr(plus_fin.indexOf('":"') + ('":"').length);
+                            }else{
+                                final_text = final_text + plus_fin;
+                            }
+                            data_text = data_text.substr(1*index_begin + (1*(data_text.search(new RegExp(cur_value, regexp_config))) - 1*index_begin) + 1*prom_data_end_delim);
+                            return recurs_data_list(data_text, cur_value, final_text, step, regexp_config);
+                        }else{
+                            if(final_text !== undefined){
+                                if(final_text.indexOf('},"') !== -1){
+                                    final_text = final_text.substr(0, final_text.length - ('},"').length)+''+close_tag;
+                                    return final_text;
+                                }else{return false;}
+                            }else{return false;}
+                        }
+                    }else{
+                        if(final_text !== undefined){
+                            if(final_text.indexOf('},"') !== -1){
+                                final_text = final_text.substr(0, final_text.length - ('},"').length)+''+close_tag;
+                                return final_text;
+                            }else{return false;}
                         }else{return false;}
-                    }else{return false;}
+                    }
                 }
             }
             
@@ -446,7 +555,10 @@ JS;
 
                 $(this).attr('code', '');
                 $(this).attr('value', '');
-                if($('#'+selector.attr('id')+'_list').length > 0){ $('#'+selector.attr('id')+'_list').remove(); }
+                if($('#'+selector.attr('id')+'_list').length > 0){ 
+                    $('#'+selector.attr('id')+'_list').remove();
+                    $('#'+selector.attr('id')+'_list_outer').remove();
+                }
                 if(data_in === undefined){return false;}
                 var data_text_clear = '';
                 var cur_value = $(this).val();
@@ -460,11 +572,14 @@ JS;
                 source = arr_sorti_local(source);
                 
                 var list_id = selector.attr('id')+'_list';
-                var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;z-index:1000;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 25)+'px;max-height:'+(26*max_show)+'px;font-size:'+selector.css('font-size')+';border:1px solid grey;"></div>';
+                var list_html = '<div id="'+list_id+'_outer" style="width:0px;height:0px;"><div id="'+list_id+'" style="top:'+ (-1*selector.parent().height()) +'px;left:0px;overflow-y:scroll;position:relative;z-index:1000;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 25 + 1*width_list)+'px;font-size:'+selector.css('font-size')+';border:1px solid grey;"></div></div>';
                 selector.parent().append(list_html);
                 
                 var list_selector_filter = $('#'+list_id);
-                list_selector_filter.mouseleave(function(){ $(this).remove(); });
+                list_selector_filter.mouseleave(function(){
+                    $(this).parent().remove();
+                    $(this).remove(); 
+                });
                 var fl_hover_list = 0;var fl_hover_btn = 0;var fl_hover_genselector = 0;
                 button_selector.unbind('mouseenter').unbind('mouseleave');
                 button_selector.hover(
@@ -472,7 +587,10 @@ JS;
                         fl_hover_btn = 1;
                     }, function() {
                         fl_hover_btn = 0;
-                        setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_genselector !== 1){list_selector_filter.remove();}}, 0);
+                        setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_genselector !== 1){
+                            list_selector_filter.parent().remove();
+                            list_selector_filter.remove();
+                        }}, 0);
                     }
                 );
                 list_selector_filter.hover(
@@ -489,17 +607,14 @@ JS;
                     },
                     function(){
                         fl_hover_genselector = 0;
-                        setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_btn !== 1){list_selector_filter.remove();}}, 0);
+                        setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_btn !== 1){
+                            list_selector_filter.parent().remove();
+                            list_selector_filter.remove();
+                        }}, 0);
                     }
                 );
 
-                for(var i in source){
-                    if(key_hide === 0){
-                        list_selector_filter.append('<div class="'+list_id+'_option_row" code="'+source[O_K_source[i]][1]+'" clear_name="'+source[O_K_source[i]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+source[O_K_source[i]][1]+'</div><div style="display:table-cell;padding:3px;">'+source[O_K_source[i]][2]+'</div></div>');
-                    }else{
-                        list_selector_filter.append('<div class="'+list_id+'_option_row" code="'+source[O_K_source[i]][1]+'" clear_name="'+source[O_K_source[i]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><div style="display:table-cell;padding:3px;">'+source[O_K_source[i]][2]+'</div></div>');
-                    }
-                }
+                draw_list(list_selector_filter, 'none', 'none', O_K_source, source, list_id);
                 
                 current_list = $('#'+list_id)[0].outerHTML;
 
@@ -586,27 +701,20 @@ JS;
 
                 selector.attr('code', $(this).attr('code'));
                 selector.attr('clear_name', $(this).attr('clear_name'));
-
-                if($(this).children('div').eq(0).html()!==''){
-                    if($(this).children('div').eq(1).length > 0){
-                        selector.val($(this).children('div').eq(0).html()+' - '+$(this).children('div').eq(1).html());
-                    }else{
-                        selector.val($(this).children('div').eq(0).html());
-                    }
-                    selector.attr('value', $(this).attr('code'));
+                
+                if($(this).children('div[class$="_opt_key"]').length > 0){
+                    selector.val($(this).children('div[class$="_opt_key"]').html()+' - '+$(this).children('div[class$="_opt_val"]').html());
                 }else{
-                    if($(this).children('div').eq(1).length > 0){
-                        selector.val($(this).children('div').eq(1).html());
-                    }else{
-                        selector.val($(this).children('div').eq(0).html());
-                    }
-                    selector.attr('value', $(this).attr('code'));
+                    selector.val($(this).children('div[class$="_opt_val"]').html());
                 }
+                
+                selector.attr('value', $(this).attr('code'));
                 
                 selector.change();
                 
                 if($('#'+selector.attr('id')+'_list').length > 0){
                     $('#'+selector.attr('id')+'_list').remove();
+                    $('#'+selector.attr('id')+'_list_outer').remove();
                 }
                 
                 current_list = '';
@@ -619,6 +727,7 @@ JS;
                 
                 if($('#'+selector.attr('id')+'_list').length > 0){
                     $('#'+selector.attr('id')+'_list').remove();
+                    $('#'+selector.attr('id')+'_list_outer').remove();
                 }
                 
                 current_value = selector.val();
@@ -628,7 +737,10 @@ JS;
                     selector.parent().append(current_list);
                     var list_id = selector.attr('id')+'_list';
                     var list_selector = $('#'+list_id);
-                    list_selector.mouseleave(function(){ $(this).remove();});
+                    list_selector.mouseleave(function(){
+                        $(this).parent().remove();
+                        $(this).remove();
+                    });
                     
                     var fl_hover_list = 0;
                     var fl_hover_btn = 0;
@@ -640,7 +752,10 @@ JS;
                             fl_hover_btn = 1;
                         }, function() {
                             fl_hover_btn = 0;
-                            setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_genselector !== 1){list_selector.remove();}}, 0);
+                            setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_genselector !== 1){
+                                list_selector.parent().remove();
+                                list_selector.remove();
+                            }}, 0);
                         }
                     );
                     list_selector.hover(
@@ -657,13 +772,19 @@ JS;
                         },
                         function(){
                             fl_hover_genselector = 0;
-                            setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_btn !== 1){list_selector.remove();}}, 0);
+                            setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_btn !== 1){
+                                list_selector.parent().remove();
+                                list_selector.remove();
+                            }}, 0);
                         }
                     );
 
                 }else{
                 
-                    if( $('#'+selector.attr('id')+'_list').length > 0){ $('#'+selector.attr('id')+'_list').remove();}
+                    if( $('#'+selector.attr('id')+'_list').length > 0){ 
+                        $('#'+selector.attr('id')+'_list').remove();
+                        $('#'+selector.attr('id')+'_list_outer').remove();
+                    }
                     var attr_start = 0;
                     var attr_s = $(this).attr('diap_s');
                     var attr_end = 1*max_show;
@@ -673,10 +794,13 @@ JS;
                     if(data_in === '' || data_in === undefined){return false;}
                     
                     var list_id = selector.attr('id')+'_list';
-                    var list_html = '<div id="'+list_id+'" style="top:'+ (selector.position().top + selector.height() + 6) +'px;left:'+ selector.position().left +'px;overflow-y:scroll;position:absolute;z-index:1000;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 25)+'px;font-size:'+selector.css('font-size')+';border:1px solid grey;"></div>';
+                    var list_html = '<div id="'+list_id+'_outer" style="width:0px;height:0px;"><div id="'+list_id+'" style="top:'+ (-1*selector.parent().height()) +'px;left:0px;overflow-y:scroll;position:relative;z-index:1000;background-color:white;padding:3px;cursor:default;width:'+(selector.width() + 25 + 1*width_list)+'px;font-size:'+selector.css('font-size')+';border:1px solid grey;"></div></div>';
                     selector.parent().append(list_html);
                     var list_selector = $('#'+list_id);
-                    list_selector.mouseleave(function(){ $(this).remove();});
+                    list_selector.mouseleave(function(){
+                        $(this).parent().remove();
+                        $(this).remove();
+                    });
                     var fl_hover_list = 0;
                     var fl_hover_btn = 0;
                     var fl_hover_genselector = 0;
@@ -687,7 +811,10 @@ JS;
                             fl_hover_btn = 1;
                         }, function() {
                             fl_hover_btn = 0;
-                            setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_genselector !== 1){list_selector.remove();}}, 0);
+                            setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_genselector !== 1){
+                                list_selector.parent().remove();
+                                list_selector.remove();
+                            }}, 0);
                         }
                     );
                     list_selector.hover(
@@ -704,7 +831,10 @@ JS;
                         },
                         function(){
                             fl_hover_genselector = 0;
-                            setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_btn !== 1){list_selector.remove();}}, 0);
+                            setTimeout(function(){if(fl_hover_list !== 1 && fl_hover_btn !== 1){
+                                list_selector.parent().remove();
+                                list_selector.remove();
+                            }}, 0);
                         }
                     );
         
@@ -719,24 +849,14 @@ JS;
                             combo_step_scroll($(this), button_selector, source, 2);
                         }
                     });
+
+                    draw_list(list_selector, attr_start, attr_end, O_K_source, source, list_id);
                     
-                    for(var i = attr_start; i < 1*attr_end; i++){
-                        if(O_K_source[i] !== undefined){
-                            if(key_hide === 0){
-                                list_selector.append('<div class="'+list_id+'_option_row" code="'+source[O_K_source[i]][1]+'" clear_name="'+source[O_K_source[i]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:21px;"><div style="display:table-cell;padding:3px;font-weight:bold;">'+source[O_K_source[i]][1]+'</div><div style="display:table-cell;padding:3px;">'+source[O_K_source[i]][2]+'</div></div>');
-                            }else{
-                                list_selector.append('<div class="'+list_id+'_option_row" code="'+source[O_K_source[i]][1]+'" clear_name="'+source[O_K_source[i]][2]+'" onmouseover="this.style.backgroundColor=&quot;#DCDCDC&quot;;" onmouseout="this.style.backgroundColor=&quot;#FFFFFF&quot;;" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:21px;"><div style="display:table-cell;padding:3px;">'+source[O_K_source[i]][2]+'</div></div>');
-                            }
-                        }else{
-                            $(this).attr('diap_e', 1*i);
-                            break;
-                        }
-                    }
                 }
             });
         };
 
-        anon_ecocombo_$this_id(selector_this_id, p_search_case, p_max_count, p_max_show, p_data, key_hide);
+        anon_ecocombo_$this_id(selector_this_id, p_search_case, p_max_count, p_max_show, p_data, key_hide, width_list);
         
 JS;
 

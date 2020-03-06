@@ -138,7 +138,6 @@ class dialog extends Model
                     $("#"+"$this->base_id").attr('pre_width', $("#"+"$this->base_id").innerWidth());
                     $("#"+"$this->base_id").attr('pre_top', $("#"+"$this->base_id").position().top);
                     $("#"+"$this->base_id").attr('pre_left', $("#"+"$this->base_id").position().left);
-
                     
                     var full_left_document = -1*(1*$("#"+"$this->base_id")[0].getClientRects()[0].left - 1*$("#"+"$this->base_id").position().left);
                     var full_top_document = -1*(1*$("#"+"$this->base_id")[0].getClientRects()[0].top - 1*$("#"+"$this->base_id").position().top);

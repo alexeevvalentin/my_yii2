@@ -123,9 +123,16 @@ class tag extends Model
             
             var source_this = "";
             
-            for(var key in arr_value){
-                source_this = source_this + "<div style='display:table;' class='"+class_del_button+"_str' id='"+class_del_button+"_"+key+"' ><div style='display:table-cell;padding:3px;'>"+arr_value[key]+"</div><div class='"+class_del_button+"' code='"+key+"' style='display:table-cell;padding:3px;cursor:pointer;'>&#9746;</div> </div>";
+            if(typeof arr_value[Object.keys(arr_value)[0]] !== 'object'){
+                for(var key in arr_value){
+                    source_this = source_this + "<div style='display:table;' class='"+class_del_button+"_str' id='"+class_del_button+"_"+key+"' ><div class='"+class_del_button+"' code='"+key+"' id='" + "$this_id" + "_" + arr_value[key] + "' style='display:table-cell;padding:3px;cursor:pointer;'>&#9746;</div><div style='display:table-cell;padding:3px;text-align:left;' clear_name='"+arr_value[key]+"' code='"+key+"'>"+arr_value[key]+"</div></div>";
+                }
+            }else{
+                for(var key in arr_value){
+                    source_this = source_this + "<div style='display:table;' class='"+class_del_button+"_str' id='"+class_del_button+"_"+key+"' ><div class='"+class_del_button+"' code='"+key+"' id='" + "$this_id" + "_" + arr_value[key][0] + "' style='display:table-cell;padding:3px;cursor:pointer;'>&#9746;</div><div style='display:table-cell;padding:3px;text-align:left;' clear_name='"+arr_value[key][0]+"' code='"+key+"'>"+arr_value[key][0]+" - <span style='font-style:italic;font-size:12px;'>"+arr_value[key][1]+"</span></div></div>";
+                }
             }
+
             sel_this.append(source_this);
 
             var isIE = false || !!document.documentMode;
@@ -141,13 +148,19 @@ class tag extends Model
                 };
             }
             
-            $(document).on("click", "."+class_del_button, function(){
+            $(document).on("click", "."+class_del_button, function(e){
+                
+                var this_id = $('#'+$(this).attr('id'));
+                var this_class = $("."+class_del_button);
+                
+                $(document).trigger(class_del_button+"_monitor_1" [$(this), e]);
+
                 class_del_button = "del_"+"$this_id";
                 sel_this = $("#$this_id");
                 this_id_hide = "$this_id"+"_hide";
                 
                 var code_val = $(this).attr("code");
-                $("#"+class_del_button+"_"+code_val).remove();
+                //$("#"+class_del_button+"_"+code_val).remove();
                 var runtime_val = JSON.parse(sel_this.attr("value"));
 
                 if(isIE === false && isEdge === false){
@@ -159,32 +172,78 @@ class tag extends Model
                 delete runtime_val[code_val];
                 sel_this.attr("value", JSON.stringify(runtime_val));
                 $("#"+this_id_hide).val(JSON.stringify(runtime_val));
+
+                $(document).trigger(class_del_button+"_monitor_2", [$(this), e, runtime_val]);
+
+                $("#"+class_del_button+"_"+code_val).remove();
+                
             });
             
-            sel_commun.change(function(){
+            sel_commun.change(function(e){
                 var data_c = JSON.stringify($data_commun);
                 var data_commun = JSON.parse(data_c);
-                var this_code = $(this).attr("code");
-                class_del_button = "del_"+"$this_id";
-                sel_this = $("#$this_id");
-                this_id_hide = "$this_id"+"_hide";
-
-                if($("#"+class_del_button+"_"+this_code).length === 0 && this_code !== '' && this_code !== undefined){
-                    sel_this.append("<div style='display:table;' class='"+class_del_button+"_str' id='"+class_del_button+"_"+this_code+"' ><div style='display:table-cell;padding:3px;'>"+data_commun[this_code]+"</div><div class='"+class_del_button+"' code='"+this_code+"' style='display:table-cell;padding:3px;cursor:pointer;'>&#9746;</div></div>");
-                    var runtime_val = JSON.parse(sel_this.attr("value"));
-                    
-                    if(isIE === false && isEdge === false){
-                        runtime_val = Object.assign({}, runtime_val);
+                
+                if(typeof data_commun[Object.keys(data_commun)[0]] !== 'object'){
+                
+                    var this_code = $(this).attr("code");
+                    class_del_button = "del_"+"$this_id";
+                    sel_this = $("#$this_id");
+                    this_id_hide = "$this_id"+"_hide";
+    
+                    if($("#"+class_del_button+"_"+this_code).length === 0 && this_code !== '' && this_code !== undefined){
+                        
+                        $(this).trigger("monitor_1", [$(this), e]);
+                        
+                        sel_this.append("<div style='display:table;' class='"+class_del_button+"_str' id='"+class_del_button+"_"+this_code+"' ><div class='"+class_del_button+"' code='"+this_code+"' id='" + "$this_id" + "_" + data_commun[this_code] + "' style='display:table-cell;padding:3px;cursor:pointer;'>&#9746;</div><div style='display:table-cell;padding:3px;text-align:left;' clear_name='"+data_commun[this_code]+"' code='"+this_code+"'>"+data_commun[this_code]+"</div></div>");
+                        var runtime_val = JSON.parse(sel_this.attr("value"));
+                        
+                        if(isIE === false && isEdge === false){
+                            runtime_val = Object.assign({}, runtime_val);
+                        }else{
+                            runtime_val = IEArrToObject__$this_id(runtime_val);
+                        }
+                        
+                        runtime_val[''+this_code] = data_commun[this_code];
+                        sel_this.attr("value", JSON.stringify(runtime_val));
+                        $("#"+this_id_hide).val(JSON.stringify(runtime_val));
+                        
+                        $(this).trigger("monitor_2", [$(this), e, runtime_val]);
+                        
                     }else{
-                        runtime_val = IEArrToObject__$this_id(runtime_val);
+                        return false;
+                    }
+                
+                }else{
+                    // width comment
+                    var this_code = $(this).attr("code");
+                    class_del_button = "del_"+"$this_id";
+                    sel_this = $("#$this_id");
+                    this_id_hide = "$this_id"+"_hide";
+    
+                    if($("#"+class_del_button+"_"+this_code).length === 0 && this_code !== '' && this_code !== undefined){
+                        
+                        $(this).trigger("monitor_1", [$(this), e]);
+                        
+                        sel_this.append("<div style='display:table;' class='"+class_del_button+"_str' id='"+class_del_button+"_"+this_code+"' ><div class='"+class_del_button+"' id='" + "$this_id" + "_" + data_commun[this_code][0] + "' code='"+this_code+"' style='display:table-cell;padding:3px;cursor:pointer;'>&#9746;</div><div style='display:table-cell;padding:3px;text-align:left;' clear_name='"+data_commun[this_code][0]+"' code='"+this_code+"'>"+data_commun[this_code][0]+" - <span style='font-style:italic;font-size:12px;'>"+data_commun[this_code][1]+"</span></div></div>");
+                        var runtime_val = JSON.parse(sel_this.attr("value"));
+
+                        if(isIE === false && isEdge === false){
+                            runtime_val = Object.assign({}, runtime_val);
+                        }else{
+                            runtime_val = IEArrToObject__$this_id(runtime_val);
+                        }
+                        runtime_val[''+this_code] = data_commun[this_code];
+                        sel_this.attr("value", JSON.stringify(runtime_val));
+                        $("#"+this_id_hide).val(JSON.stringify(runtime_val));
+                        
+                        $(this).trigger("monitor_2", [$(this), e, runtime_val]);
+                        
+                    }else{
+                        return false;
                     }
                     
-                    runtime_val[''+this_code] = data_commun[this_code];
-                    sel_this.attr("value", JSON.stringify(runtime_val));
-                    $("#"+this_id_hide).val(JSON.stringify(runtime_val));
-                }else{
-                    return false;
                 }
+                
             });
             
 JS;
@@ -572,7 +631,7 @@ JS;
                 source = arr_sorti_local(source);
                 
                 var list_id = selector.attr('id')+'_list';
-                var list_html = '<div id="'+list_id+'_outer" style="width:0px;height:0px;"><div id="'+list_id+'" style="top:'+ (-1*selector.parent().height()) +'px;left:0px;overflow-y:scroll;position:relative;z-index:1000;background-color:white;padding:3px;cursor:default;max-height:250px;width:'+(selector.width() + 25 + 1*width_list)+'px;font-size:'+selector.css('font-size')+';border:1px solid grey;"></div></div>';
+                var list_html = '<div id="'+list_id+'_outer" style="width:0px;height:0px;"><div id="'+list_id+'" style="top:'+ (-1*selector.parent().height()) +'px;left:0px;position:relative;overflow-y:auto;z-index:1000;background-color:white;padding:3px;cursor:default;max-height:250px;width:'+(selector.width() + 25 + 1*width_list)+'px;font-size:'+selector.css('font-size')+';border:1px solid grey;"></div></div></div>';
                 selector.parent().append(list_html);
                 
                 var list_selector_filter = $('#'+list_id);
@@ -616,7 +675,7 @@ JS;
 
                 draw_list(list_selector_filter, 'none', 'none', O_K_source, source, list_id);
                 
-                current_list = $('#'+list_id)[0].outerHTML;
+                current_list = $('#'+list_id).parent()[0].outerHTML;
 
             });
 
@@ -734,6 +793,7 @@ JS;
                 var dpos = data_in.indexOf(current_value);
 
                 if(dpos !== -1 && current_value.trim() !== '' && current_list !== '' && current_list !== undefined){
+
                     selector.parent().append(current_list);
                     var list_id = selector.attr('id')+'_list';
                     var list_selector = $('#'+list_id);
@@ -792,9 +852,9 @@ JS;
                     $(this).attr('diap_s', 0);
                     $(this).attr('diap_e', max_show);
                     if(data_in === '' || data_in === undefined){return false;}
-                    
+
                     var list_id = selector.attr('id')+'_list';
-                    var list_html = '<div id="'+list_id+'_outer" style="width:0px;height:0px;"><div id="'+list_id+'" style="top:'+ (-1*selector.parent().height()) +'px;left:0px;overflow-y:scroll;position:relative;z-index:1000;background-color:white;padding:3px;cursor:default;max-height:250px;width:'+(selector.width() + 25 + 1*width_list)+'px;font-size:'+selector.css('font-size')+';border:1px solid grey;"></div></div>';
+                    var list_html = '<div id="'+list_id+'_outer" style="width:0px;height:0px;"><div id="'+list_id+'" style="top:'+ (-1*selector.parent().height()) +'px;left:0px;position:relative;overflow-y:auto;z-index:1000;background-color:white;padding:3px;cursor:default;max-height:250px;width:'+(selector.width() + 25 + 1*width_list)+'px;font-size:'+selector.css('font-size')+';border:1px solid grey;"></div></div>';
                     selector.parent().append(list_html);
                     var list_selector = $('#'+list_id);
                     list_selector.mouseleave(function(){

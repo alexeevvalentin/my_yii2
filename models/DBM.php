@@ -55,7 +55,6 @@ class DBM extends \yii\db\ActiveRecord
         return $arr;
     }
 
-
     public function getcolumns_nopk(){
         $arr = [];
         $primary_key = Yii::$app->db->createCommand('SHOW KEYS FROM '.self::$smodel_name.' WHERE Key_name = "PRIMARY"')->queryAll()[0]['Column_name'];

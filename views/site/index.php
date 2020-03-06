@@ -22,6 +22,8 @@ echo '<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquer
 $this->title = 'Yii проекты';
 Yii::$app->name = 'Мои Yii проекты';
 
+
+
 ?>
 
 

@@ -437,8 +437,8 @@ JS;
                     if(fl === 1){
                         diap_s = 1*cbutton.attr('diap_s') + 1;
                         diap_e = 1*cbutton.attr('diap_e') + 1;
-
-                        if(O_K_source[diap_e] === undefined){
+                        
+                        if(O_K_source[diap_e - 1] === undefined){
                             return false;
                         }
                         
